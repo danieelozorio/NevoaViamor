@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Névoa de Viamor</title>
+
+<style>
+body {
+  background: radial-gradient(circle, #0a0a0a, #000);
+  color: #d6d6d6;
+  font-family: Arial;
+  padding: 15px;
+}
+
+h1, h2 {
+  color: #8f8f8f;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  background: #111;
+  border: 1px solid #333;
+  color: white;
+}
+
+button {
+  padding: 10px;
+  margin: 5px;
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+}
+
+.box {
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #222;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌫️ Névoa de Viamor</h1>
+
+<div id="loginBox" class="box">
+<h2>Entrar</h2>
+<input id="nomeJogador" placeholder="Nome do jogador">
+<button onclick="entrar()">Entrar</button>
+</div>
+
+<div id="app" style="display:none">
+
+<div class="box">
+<h2>Personagem</h2>
+<input id="nome" placeholder="Nome">
+<input id="classe" placeholder="Classe">
+<input id="idade" placeholder="Idade">
+<input id="aparencia" placeholder="Aparência">
+</div>
+
+<div class="box">
+<h2>Atributos</h2>
+
+<label>Força</label>
+<input type="number" id="forca">
+
+<label>Agilidade</label>
+<input type="number" id="agi">
+
+<label>Mente</label>
+<input type="number" id="mente">
+
+<label>Presença</label>
+<input type="number" id="pres">
+</div>
+
+<div class="box">
+<h2>Status</h2>
+
+<p>Vida: <span id="vida">20</span></p>
+<button onclick="vida++; salvar()">+</button>
+<button onclick="vida--; salvar()">-</button>
+
+<p>Memória: <span id="memoria">10</span></p>
+<button onclick="if(memoria<10){memoria++}; salvar()">+</button>
+<button onclick="if(memoria>0){memoria--}; salvar()">-</button>
+
+</div>
+
+<div class="box">
+<h2>Defesa</h2>
+<p id="defesa">10</p>
+</div>
+
+<div class="box">
+<h2>Combate</h2>
+<input id="arma" placeholder="Arma">
+<input id="dano" placeholder="Dano">
+<p>d20 + ______ (atributo)</p>
+</div>
+
+<div class="box">
+<h2>Habilidades</h2>
+<textarea id="habilidades"></textarea>
+</div>
+
+<div class="box">
+<h2>Âncora</h2>
+<input id="ancora">
+</div>
+
+<div class="box">
+<h2>Inventário</h2>
+<input id="item1">
+<input id="item2">
+<input id="item3">
+</div>
+
+<div class="box">
+<h2>Memórias</h2>
+<textarea id="memorias"></textarea>
+</div>
+
+</div>
+
+<script>
+
+let jogador = "";
+let vida = 20;
+let memoria = 10;
+
+function entrar() {
+  jogador = document.getElementById("nomeJogador").value;
+
+  if (!jogador) return;
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  carregar();
+}
+
+function salvar() {
+  let dados = {
+    nome: val("nome"),
+    classe: val("classe"),
+    idade: val("idade"),
+    aparencia: val("aparencia"),
+    forca: val("forca"),
+    agi: val("agi"),
+    mente: val("mente"),
+    pres: val("pres"),
+    arma: val("arma"),
+    dano: val("dano"),
+    habilidades: val("habilidades"),
+    ancora: val("ancora"),
+    item1: val("item1"),
+    item2: val("item2"),
+    item3: val("item3"),
+    memorias: val("memorias"),
+    vida: vida,
+    memoria: memoria
+  };
+
+  localStorage.setItem(jogador, JSON.stringify(dados));
+  atualizar();
+}
+
+function carregar() {
+  let dados = JSON.parse(localStorage.getItem(jogador));
+
+  if (!dados) return;
+
+  set("nome", dados.nome);
+  set("classe", dados.classe);
+  set("idade", dados.idade);
+  set("aparencia", dados.aparencia);
+  set("forca", dados.forca);
+  set("agi", dados.agi);
+  set("mente", dados.mente);
+  set("pres", dados.pres);
+  set("arma", dados.arma);
+  set("dano", dados.dano);
+  set("habilidades", dados.habilidades);
+  set("ancora", dados.ancora);
+  set("item1", dados.item1);
+  set("item2", dados.item2);
+  set("item3", dados.item3);
+  set("memorias", dados.memorias);
+
+  vida = dados.vida || 20;
+  memoria = dados.memoria || 10;
+
+  atualizar();
+}
+
+function atualizar() {
+  document.getElementById("vida").innerText = vida;
+  document.getElementById("memoria").innerText = memoria;
+
+  let agi = document.getElementById("agi").value;
+  let defesa = 10 + Number(agi || 0);
+
+  document.getElementById("defesa").innerText = defesa;
+}
+
+function val(id) {
+  return document.getElementById(id).value;
+}
+
+function set(id, v) {
+  document.getElementById(id).value = v || "";
+}
+
+document.querySelectorAll("input, textarea").forEach(el => {
+  el.addEventListener("input", salvar);
+});
+
+</script>
+
+</body>
+</html>
