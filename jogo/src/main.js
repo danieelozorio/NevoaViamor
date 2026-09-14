@@ -361,9 +361,16 @@
     });
   }
 
-  window.addEventListener("load", () => {
+  function iniciar() {
     Game.init(document.getElementById("tela"));
     ligarControlesTouch();
     Game.push(new TelaTitulo());
-  });
+  }
+
+  // O script pode ser injetado depois do "load" (páginas publicadas fazem isso).
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", iniciar);
+  } else {
+    iniciar();
+  }
 })(window);
