@@ -16,6 +16,25 @@ O progresso é salvo no `localStorage` do próprio navegador.
 | **Torre** | Andares infinitos, cada vez mais duros, pagos em fé. |
 | **Missões** | Metas diárias, roda das facções e as crônicas da sua jornada. |
 
+### Guardar e restaurar
+O progresso vive no `localStorage`, ou seja: preso ao navegador e ao endereço do site. Para não
+depender só disso, a aba **Missões** tem o cartão *Guardar e restaurar*:
+
+- **Gerar código de save** — empacota todo o progresso num código de texto (copiar ou baixar como
+  arquivo). Formato `ALIANCA1.<g|p>.<assinatura>.<base64>`, comprimido com gzip pela
+  `CompressionStream` do próprio navegador quando disponível, com queda para base64 puro quando não.
+  Um save completo — 43 heróis no nível máximo — cabe em menos de mil caracteres.
+- **Restaurar de um código** — aceita texto colado ou arquivo. Antes de valer, o save passa por
+  conferência de assinatura e saneamento: herói que não existe mais é descartado, níveis, estrelas e
+  relíquias voltam para dentro dos limites, valores negativos ou inválidos viram zero e um relógio
+  adiantado não vira oferta ociosa de graça.
+- **Desfazer a última restauração** — o save anterior é guardado à parte, então restaurar por engano
+  não custa a jornada.
+
+Salvar em nuvem de verdade (sincronizar sozinho entre aparelhos) exige um serviço externo com login,
+já que o GitHub Pages é hospedagem estática. O código de save resolve backup e troca de aparelho
+sem depender de nada disso.
+
 ### Oferta da Vigília (o "AFK")
 O altar acumula ouro, óleo, pergaminhos e fé mesmo com o jogo fechado, até o teto de **12 horas**.
 A taxa por hora cresce a cada estágio vencido — avançar na campanha é o que acelera todo o resto.
@@ -53,10 +72,10 @@ alianca/
 ├── index.html
 ├── css/estilo.css
 └── src/
-    ├── nucleo/      util.js · formulas.js (progressão) · estado.js (save, AFK, gacha)
+    ├── nucleo/      util.js · formulas.js (progressão) · estado.js (save, AFK, gacha, códigos de save)
     ├── dados/       herois.js (43 heróis) · campanha.js (inimigos e capítulos)
-    ├── combate/     motor.js (simulação) · arte.js (pixel art) · cena.js (animação)
-    ├── ui/          interface.js · campanha.js · herois.js
+    ├── combate/     motor.js (simulação) · arte.js (pixel art) · efeitos.js · cena.js (animação)
+    ├── ui/          interface.js · campanha.js · herois.js · save.js
     └── main.js
 ```
 

@@ -325,6 +325,8 @@
     f.appendChild(lista);
     frag.appendChild(f);
 
+    if (UI.cartaoSave) frag.appendChild(UI.cartaoSave());
+
     // estatísticas
     const s = UI.el("div", "cartao");
     s.appendChild(UI.el("h2", null, "Crônicas"));

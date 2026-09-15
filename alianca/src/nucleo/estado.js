@@ -53,6 +53,67 @@
     return { novo: true, fragmentos: 0 };
   }
 
+  // Confere e conserta um save vindo de fora (arquivo antigo, código colado,
+  // versão anterior do jogo) antes de deixá-lo entrar em uso.
+  function normalizar(dados) {
+    if (!dados || typeof dados !== "object" || !dados.versao) return null;
+    const d = dados;
+
+    d.recursos = Object.assign({ ouro: 0, essencia: 0, pergaminhos: 0, fe: 0 }, d.recursos || {});
+    Object.keys(d.recursos).forEach((k) => {
+      const v = Number(d.recursos[k]);
+      d.recursos[k] = isFinite(v) && v > 0 ? Math.floor(v) : 0;
+    });
+
+    d.herois = d.herois && typeof d.herois === "object" ? d.herois : {};
+    Object.keys(d.herois).forEach((id) => {
+      const def = Jogo.heroiPorId(id);
+      if (!def) {
+        delete d.herois[id];
+        return;
+      }
+      const f = d.herois[id] || {};
+      f.nivel = U.limitar(Math.floor(f.nivel || 1), 1, F.NIVEL_MAXIMO_ABSOLUTO);
+      f.estrelas = U.limitar(Math.floor(f.estrelas || 1), 1, F.RARIDADES[def.raridade].estrelasMax);
+      f.reliquias = Array.isArray(f.reliquias) ? f.reliquias.slice(0, 4) : [];
+      while (f.reliquias.length < 4) f.reliquias.push(0);
+      f.reliquias = f.reliquias.map((v) => U.limitar(Math.floor(v || 0), 0, 20));
+      f.copias = Math.max(1, Math.floor(f.copias || 1));
+      d.herois[id] = f;
+    });
+
+    d.fragmentos = d.fragmentos && typeof d.fragmentos === "object" ? d.fragmentos : {};
+    Object.keys(d.fragmentos).forEach((id) => {
+      if (!Jogo.heroiPorId(id)) delete d.fragmentos[id];
+      else d.fragmentos[id] = Math.max(0, Math.floor(d.fragmentos[id] || 0));
+    });
+
+    d.formacao = (Array.isArray(d.formacao) ? d.formacao : []).filter((id) => d.herois[id]).slice(0, 5);
+    if (!d.formacao.length) d.formacao = Object.keys(d.herois).slice(0, 5);
+
+    d.campanha = Object.assign({ capitulo: 0, estagio: 0, vencidos: 0 }, d.campanha || {});
+    d.campanha.capitulo = U.limitar(Math.floor(d.campanha.capitulo || 0), 0, Jogo.Capitulos.length - 1);
+    d.campanha.estagio = U.limitar(Math.floor(d.campanha.estagio || 0), 0, Jogo.ESTAGIOS_POR_CAPITULO - 1);
+    d.campanha.vencidos = U.limitar(Math.floor(d.campanha.vencidos || 0), 0, Jogo.TOTAL_ESTAGIOS);
+
+    d.torre = Object.assign({ andar: 1, melhor: 0 }, d.torre || {});
+    d.torre.andar = Math.max(1, Math.floor(d.torre.andar || 1));
+    d.torre.melhor = Math.max(0, Math.floor(d.torre.melhor || 0));
+
+    d.ocioso = d.ocioso || {};
+    if (!d.ocioso.desde || !isFinite(d.ocioso.desde) || d.ocioso.desde > Date.now()) d.ocioso.desde = Date.now();
+
+    d.invocacoes = Object.assign({ total: 0, pityEpico: 0, pityLendario: 0 }, d.invocacoes || {});
+    d.estatisticas = Object.assign({ vitorias: 0, derrotas: 0, batalhas: 0 }, d.estatisticas || {});
+    d.missoes = Object.assign(
+      { dia: hoje(), batalhas: 0, invocacoes: 0, melhorias: 0, coletas: 0, resgatadas: [] },
+      d.missoes || {}
+    );
+    if (!Array.isArray(d.missoes.resgatadas)) d.missoes.resgatadas = [];
+    d.vistos = d.vistos || {};
+    return d;
+  }
+
   // ----------------------------------------------------------- persistência
   E.carregar = function () {
     let salvo = null;
@@ -61,9 +122,7 @@
     } catch (e) {
       salvo = null;
     }
-    E.dados = salvo && salvo.versao ? salvo : novoJogo();
-    if (!E.dados.fragmentos) E.dados.fragmentos = {};
-    if (!E.dados.vistos) E.dados.vistos = {};
+    E.dados = normalizar(salvo) || novoJogo();
     E.checarDia();
     return E.dados;
   };
@@ -319,7 +378,7 @@
   };
 
   E.tempoOcioso = function () {
-    return Math.min(TETO_OCIOSO_MS, Date.now() - E.dados.ocioso.desde);
+    return Math.max(0, Math.min(TETO_OCIOSO_MS, Date.now() - E.dados.ocioso.desde));
   };
 
   E.recompensaOciosa = function () {
@@ -419,6 +478,148 @@
     m.resgatadas.push(id);
     E.salvar();
     return { ok: true, premio: missao.premio };
+  };
+
+  // ------------------------------------------------ código de save (backup)
+  // Formato: ALIANCA1.<g|p>.<assinatura>.<base64>  (g = comprimido com gzip)
+  const MARCA = "ALIANCA1";
+  const CHAVE_BACKUP = "alianca.save.anterior";
+
+  function assinatura(texto) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < texto.length; i++) {
+      h ^= texto.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(36);
+  }
+
+  function paraBase64(bytes) {
+    let bruto = "";
+    const passo = 8192;
+    for (let i = 0; i < bytes.length; i += passo) {
+      bruto += String.fromCharCode.apply(null, bytes.subarray(i, i + passo));
+    }
+    return btoa(bruto);
+  }
+
+  function deBase64(texto) {
+    const bruto = atob(texto);
+    const bytes = new Uint8Array(bruto.length);
+    for (let i = 0; i < bruto.length; i++) bytes[i] = bruto.charCodeAt(i);
+    return bytes;
+  }
+
+  async function comprimir(bytes) {
+    if (typeof global.CompressionStream === "undefined") return null;
+    const fluxo = new Blob([bytes]).stream().pipeThrough(new global.CompressionStream("gzip"));
+    return new Uint8Array(await new Response(fluxo).arrayBuffer());
+  }
+
+  async function descomprimir(bytes) {
+    const fluxo = new Blob([bytes]).stream().pipeThrough(new global.DecompressionStream("gzip"));
+    return new Uint8Array(await new Response(fluxo).arrayBuffer());
+  }
+
+  E.exportar = async function () {
+    E.salvar();
+    const texto = JSON.stringify(E.dados);
+    const bytes = new TextEncoder().encode(texto);
+    let corpo = null;
+    let modo = "p";
+    try {
+      const comprimido = await comprimir(bytes);
+      if (comprimido) {
+        corpo = paraBase64(comprimido);
+        modo = "g";
+      }
+    } catch (e) {
+      corpo = null;
+    }
+    if (!corpo) corpo = paraBase64(bytes);
+    return [MARCA, modo, assinatura(texto), corpo].join(".");
+  };
+
+  E.importar = async function (codigo) {
+    if (!codigo || !String(codigo).trim()) return { ok: false, motivo: "Cole o código do save." };
+    const partes = String(codigo).replace(/\s+/g, "").split(".");
+    if (partes.length !== 4 || partes[0] !== MARCA)
+      return { ok: false, motivo: "Isso não parece um código de save deste jogo." };
+
+    let texto;
+    try {
+      let bytes = deBase64(partes[3]);
+      if (partes[1] === "g") bytes = await descomprimir(bytes);
+      texto = new TextDecoder().decode(bytes);
+    } catch (e) {
+      return { ok: false, motivo: "Código incompleto ou corrompido — copie-o inteiro." };
+    }
+    if (assinatura(texto) !== partes[2])
+      return { ok: false, motivo: "Código corrompido: a assinatura não confere." };
+
+    let dados;
+    try {
+      dados = JSON.parse(texto);
+    } catch (e) {
+      return { ok: false, motivo: "Código ilegível." };
+    }
+
+    const limpo = normalizar(dados);
+    if (!limpo) return { ok: false, motivo: "Esse save não é válido." };
+
+    try {
+      localStorage.setItem(CHAVE_BACKUP, JSON.stringify(E.dados));
+    } catch (e) {
+      /* sem espaço para o backup: a restauração segue mesmo assim */
+    }
+    E.dados = limpo;
+    E.checarDia();
+    E.salvar();
+    return { ok: true, resumo: E.resumo() };
+  };
+
+  E.resumo = function (dados) {
+    const d = dados || E.dados;
+    return {
+      herois: Object.keys(d.herois).length,
+      vencidos: d.campanha.vencidos,
+      capitulo: d.campanha.capitulo + 1,
+      estagio: d.campanha.estagio + 1,
+      torre: d.torre.andar,
+    };
+  };
+
+  E.temBackup = function () {
+    try {
+      return !!localStorage.getItem(CHAVE_BACKUP);
+    } catch (e) {
+      return false;
+    }
+  };
+
+  E.desfazerImportacao = function () {
+    let bruto = null;
+    try {
+      bruto = localStorage.getItem(CHAVE_BACKUP);
+    } catch (e) {
+      bruto = null;
+    }
+    if (!bruto) return { ok: false, motivo: "Não há save anterior guardado." };
+    let anterior;
+    try {
+      anterior = normalizar(JSON.parse(bruto));
+    } catch (e) {
+      anterior = null;
+    }
+    if (!anterior) return { ok: false, motivo: "O save anterior está corrompido." };
+    E.dados = anterior;
+    E.salvar();
+    try {
+      localStorage.removeItem(CHAVE_BACKUP);
+    } catch (e) {
+      /* nada a fazer */
+    }
+    return { ok: true };
   };
 
   E.TAXAS = TAXAS;
