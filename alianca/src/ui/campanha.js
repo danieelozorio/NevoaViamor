@@ -50,7 +50,7 @@
   // ------------------------------------------------------------- campanha
   function cenarioDe(capitulo) {
     const cap = Jogo.Capitulos[capitulo];
-    return { ceu: cap.ceu, chao: cap.chao };
+    return { ceu: cap.ceu, chao: cap.chao, props: cap.props };
   }
 
   function selecionados() {
@@ -249,7 +249,7 @@
         inimigos: E.inimigosTorre(t.andar),
         titulo: "Torre da Provação",
         sub: "Andar " + t.andar,
-        cenario: { ceu: ["#161228", "#3a2a5a"], chao: "#2a2438" },
+        cenario: { ceu: ["#161228", "#3a2a5a"], chao: "#2a2438", props: "torre" },
         aoFim: (resultado) => {
           if (resultado.vencedor === "aliados") {
             const ganho = E.vencerTorre();

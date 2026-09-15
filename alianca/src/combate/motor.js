@@ -7,8 +7,9 @@
   const F = Jogo.Formulas;
 
   const ENERGIA_MAXIMA = 100;
-  const ENERGIA_ATAQUE = 25;
-  const ENERGIA_DANO = 10;
+  const ENERGIA_INICIAL = 20;
+  const ENERGIA_ATAQUE = 34;
+  const ENERGIA_DANO = 12;
   const LIMITE_ACOES = 260;
   const GAUGE = 1000;
 
@@ -33,7 +34,7 @@
       max: stats,
       vida: stats.vida,
       vidaMax: stats.vida,
-      energia: 0,
+      energia: ENERGIA_INICIAL,
       escudo: 0,
       status: [],
       vivo: true,
@@ -516,7 +517,7 @@
     } else {
       ev(ctx, { t: "acao", uid: u.uid, estilo: "basico", nome: "Ataque", alvo: alvo.uid });
       ctx.ultimoAlvo = alvo;
-      const multBasico = u.classe === "guerreiro" ? 1.15 : u.classe === "arqueiro" ? 1.3 : 1.05;
+      const multBasico = u.classe === "guerreiro" ? 1.0 : u.classe === "arqueiro" ? 1.15 : 0.95;
       aplicarDano(ctx, u, alvo, multBasico);
       ganharEnergia(ctx, u, ENERGIA_ATAQUE);
       disparar(ctx, u, "ao_atacar", alvo);
