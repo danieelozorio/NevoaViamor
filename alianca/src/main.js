@@ -31,6 +31,16 @@
 
   function iniciar() {
     E.carregar();
+
+    if (Jogo.ArteExterna) {
+      let pendente = null;
+      Jogo.ArteExterna.definirCallback(() => {
+        clearTimeout(pendente);
+        pendente = setTimeout(() => UI.render(), 200);
+      });
+      Jogo.ArteExterna.iniciar();
+    }
+
     Jogo.Cena.configurar(document.getElementById("palco"), document.getElementById("log"));
     UI.ligarControles();
     UI.irPara("campanha");

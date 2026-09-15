@@ -61,6 +61,11 @@ Tudo é desenhado por código, sem uma única imagem externa:
   perspectiva atmosférica, um elemento próprio de cada capítulo (árvores do Éden, pirâmides, dunas,
   as muralhas de Jericó, tendas, a cidade, o altar do Carmelo, o zigurate da Babilônia, o abismo e o
   horizonte em chamas), chão com trilha central e silhuetas em primeiro plano, tudo sob vinheta.
+- **Ilustrações próprias (opcional)** — largar um `alianca/arte/<id>.png` com fundo transparente
+  substitui o boneco daquele herói no elenco e no campo de batalha; quem não tiver arquivo segue
+  desenhado por código, então dá para ilustrar aos poucos. O jogo recorta as margens vazias e
+  normaliza a altura sozinho. Ver `alianca/arte/LEIA-ME.md` e as instruções prontas em
+  `alianca/arte/PROMPTS.md`.
 - **Efeitos das supremas** deduzidos da própria ficha do herói: colunas de fogo, onda d'água,
   raios de luz, anéis de sombra, cortes, domos de escudo e partículas de cura — com clarão colorido,
   tremor de tela e faixa com o nome da habilidade.
@@ -71,10 +76,12 @@ Tudo é desenhado por código, sem uma única imagem externa:
 alianca/
 ├── index.html
 ├── css/estilo.css
+├── arte/           ilustrações opcionais (<id>.png) + lista.js + PROMPTS.md
+├── ferramentas/    gerar-prompts.js
 └── src/
     ├── nucleo/      util.js · formulas.js (progressão) · estado.js (save, AFK, gacha, códigos de save)
     ├── dados/       herois.js (43 heróis) · campanha.js (inimigos e capítulos)
-    ├── combate/     motor.js (simulação) · arte.js (pixel art) · efeitos.js · cena.js (animação)
+    ├── combate/     motor.js (simulação) · arte.js (pixel art) · arte-externa.js · efeitos.js · cena.js
     ├── ui/          interface.js · campanha.js · herois.js · save.js
     └── main.js
 ```

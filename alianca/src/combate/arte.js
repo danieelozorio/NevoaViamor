@@ -11,6 +11,19 @@
 
   const cache = {};
 
+  function escalaDispositivo(ctx) {
+    try {
+      const t = ctx.getTransform();
+      return Math.abs(t.a) || 1;
+    } catch (e) {
+      return 1;
+    }
+  }
+
+  function arteExterna(id) {
+    return id && Jogo.ArteExterna && Jogo.ArteExterna.pronta(id) ? Jogo.ArteExterna : null;
+  }
+
   // ------------------------------------------------------------- cores
   function componentes(cor) {
     if (cor[0] === "#") {
@@ -412,7 +425,9 @@
     const p = opcoes.progresso || 0;
     const fase = opcoes.fase || 0;
 
-    const corpo = comporCorpo(c, classe, faccao, e);
+    const externa = arteExterna(opcoes.id);
+    const usarIlustracao = externa && Jogo.ArteExterna.temSprite(opcoes.id);
+    const corpo = usarIlustracao ? null : comporCorpo(c, classe, faccao, e);
 
     // deslocamentos da pose
     let alturaVoo = Math.sin(fase) * 0.8 * e;
@@ -461,23 +476,38 @@
     ctx.scale(lado, 1);
     if (inclinacao) ctx.rotate(inclinacao);
 
-    ctx.drawImage(corpo.canvas, -corpo.ox, -corpo.oy);
-    if (opcoes.flash > 0.02) {
-      ctx.globalAlpha = alfa * Math.min(1, opcoes.flash) * 0.75;
-      ctx.drawImage(corpo.brilho, -corpo.ox, -corpo.oy);
-      ctx.globalAlpha = alfa;
+    if (usarIlustracao) {
+      const dev = escalaDispositivo(ctx);
+      const alturaLogica = 56 * e;
+      const sprite = Jogo.ArteExterna.sprite(opcoes.id, alturaLogica * dev);
+      if (sprite) {
+        const larguraLogica = sprite.largura / dev;
+        ctx.drawImage(sprite.canvas, -larguraLogica / 2, -alturaLogica, larguraLogica, alturaLogica);
+        if (opcoes.flash > 0.02) {
+          ctx.globalAlpha = alfa * Math.min(1, opcoes.flash) * 0.7;
+          ctx.drawImage(sprite.brilho, -larguraLogica / 2, -alturaLogica, larguraLogica, alturaLogica);
+          ctx.globalAlpha = alfa;
+        }
+      }
+    } else {
+      ctx.drawImage(corpo.canvas, -corpo.ox, -corpo.oy);
+      if (opcoes.flash > 0.02) {
+        ctx.globalAlpha = alfa * Math.min(1, opcoes.flash) * 0.75;
+        ctx.drawImage(corpo.brilho, -corpo.ox, -corpo.oy);
+        ctx.globalAlpha = alfa;
+      }
+
+      // adereço principal, preso à mão da frente
+      ctx.save();
+      ctx.translate(9 * e, -19 * e);
+      ctx.rotate(anguloArma);
+      desenharSimbolo(ctx, c.simbolo, e, c);
+      ctx.restore();
     }
 
-    // adereço principal, preso à mão da frente
-    ctx.save();
-    ctx.translate(9 * e, -19 * e);
-    ctx.rotate(anguloArma);
-    desenharSimbolo(ctx, c.simbolo, e, c);
     ctx.restore();
 
-    ctx.restore();
-
-    if (opcoes.halo) {
+    if (opcoes.halo && !usarIlustracao) {
       ctx.save();
       ctx.globalAlpha = alfa * 0.9;
       ctx.strokeStyle = "#ffe9a0";
@@ -533,12 +563,35 @@
     }
     ctx.restore();
 
-    A.desenharHeroi(ctx, heroi.arte, lado / 2, lado * 0.95, lado / 62, {
-      classe: heroi.classe,
-      faccao: heroi.faccao,
-      halo: heroi.faccao === "celestiais",
-      aura: heroi.faccao === "trevas" ? "rgba(155,60,180,0.85)" : null,
-    });
+    const externa = arteExterna(heroi.id);
+    if (externa) {
+      const r = Jogo.ArteExterna.imagem(heroi.id);
+      const lim = r.limites;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      if (lim.recortada) {
+        // figura recortada: encaixa inteira, com os pés perto da base
+        const escala = Math.min((lado * 0.92) / lim.altura, (lado * 0.92) / lim.largura);
+        const larg = lim.largura * escala;
+        const alt = lim.altura * escala;
+        ctx.drawImage(r.img, lim.x0, lim.y0, lim.largura, lim.altura, (lado - larg) / 2, lado * 0.96 - alt, larg, alt);
+      } else {
+        // ilustração de fundo fechado: preenche o cartão
+        const escala = Math.max(lado / lim.largura, lado / lim.altura);
+        const larg = lim.largura * escala;
+        const alt = lim.altura * escala;
+        ctx.drawImage(r.img, lim.x0, lim.y0, lim.largura, lim.altura, (lado - larg) / 2, (lado - alt) / 2, larg, alt);
+      }
+      ctx.imageSmoothingEnabled = false;
+    } else {
+      A.desenharHeroi(ctx, heroi.arte, lado / 2, lado * 0.95, lado / 62, {
+        id: heroi.id,
+        classe: heroi.classe,
+        faccao: heroi.faccao,
+        halo: heroi.faccao === "celestiais",
+        aura: heroi.faccao === "trevas" ? "rgba(155,60,180,0.85)" : null,
+      });
+    }
 
     // moldura da raridade
     ctx.strokeStyle = A.comAlfa(raridade.cor, 0.8);

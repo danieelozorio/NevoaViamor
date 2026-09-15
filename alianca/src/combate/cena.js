@@ -778,6 +778,7 @@
     }
 
     A.desenharHeroi(ctx, heroi.arte, x, y, ESCALA_UNIDADE, {
+      id: heroi.id,
       espelhar: heroi.lado === "inimigos",
       classe: heroi.classe,
       faccao: heroi.faccao,
