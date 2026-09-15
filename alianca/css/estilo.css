@@ -1,0 +1,339 @@
+:root {
+  --fundo: #12101a;
+  --fundo-alto: #1b1726;
+  --painel: #221d31;
+  --borda: #3b3352;
+  --ouro: #e8c45a;
+  --ouro-escuro: #8a6f2a;
+  --texto: #e9e3d4;
+  --suave: #a79ab0;
+  --verde: #6fd08a;
+  --vermelho: #e06a6a;
+  --azul: #7fb8e8;
+  --roxo: #b07ae0;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 50% 0%, #241f38, var(--fundo));
+  color: var(--texto);
+  font-family: "Georgia", "Iowan Old Style", serif;
+  font-size: 15px;
+}
+
+body { padding-bottom: env(safe-area-inset-bottom); }
+
+#app {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------------- cabeçalho */
+#barra {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 10px 12px calc(8px);
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  background: linear-gradient(180deg, #1d1830, rgba(18, 16, 26, 0.92));
+  border-bottom: 1px solid var(--borda);
+  backdrop-filter: blur(6px);
+}
+
+.marca { display: flex; align-items: center; gap: 10px; }
+.marca-icone { font-size: 22px; color: var(--ouro); }
+.marca strong { display: block; font-size: 16px; letter-spacing: 0.5px; }
+.marca small { display: block; color: var(--suave); font-size: 11px; }
+
+.recursos { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.recurso {
+  flex: 1 1 0;
+  min-width: 70px;
+  background: var(--painel);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.recurso b { color: var(--ouro); font-weight: normal; font-size: 13px; }
+
+/* ------------------------------------------------------------------ telas */
+.tela { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+.cartao {
+  background: linear-gradient(180deg, var(--painel), var(--fundo-alto));
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 24px -18px #000;
+}
+
+.cartao h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  color: var(--ouro);
+  letter-spacing: 0.4px;
+}
+.cartao h3 { margin: 0 0 6px; font-size: 14px; color: var(--texto); }
+.cartao p { margin: 6px 0; color: var(--suave); font-size: 13px; line-height: 1.45; }
+.legenda { color: var(--suave); font-size: 12px; }
+
+.botao {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ouro-escuro);
+  background: linear-gradient(180deg, #4a3a18, #2d2412);
+  color: var(--ouro);
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.botao:active { transform: translateY(1px); }
+.botao[disabled] { opacity: 0.45; cursor: default; }
+.botao.secundario {
+  background: linear-gradient(180deg, #2a2440, #1e1a2e);
+  border-color: var(--borda);
+  color: var(--texto);
+}
+.botao.pequeno { padding: 8px; font-size: 13px; }
+
+.linha-botoes { display: flex; gap: 8px; }
+.linha-botoes .botao { margin-top: 8px; }
+
+/* -------------------------------------------------------------- campanha */
+.cabecalho-capitulo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.selo-estagio {
+  background: #171426;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 6px 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--suave);
+  white-space: nowrap;
+}
+.selo-estagio b { display: block; font-size: 18px; color: var(--ouro); }
+
+.poderes { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.poder { flex: 1; text-align: center; background: #171426; border: 1px solid var(--borda); border-radius: 8px; padding: 8px; }
+.poder small { display: block; color: var(--suave); font-size: 11px; }
+.poder b { font-size: 16px; }
+.poder.aliado b { color: var(--verde); }
+.poder.inimigo b { color: var(--vermelho); }
+.poder-vs { color: var(--suave); font-size: 12px; }
+
+.fileira-retratos { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.retrato-mini { width: 46px; text-align: center; }
+.retrato-mini canvas {
+  width: 46px; height: 46px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  display: block;
+}
+.retrato-mini small { font-size: 9px; color: var(--suave); display: block; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.barra-ociosa { height: 8px; background: #171426; border-radius: 4px; overflow: hidden; border: 1px solid var(--borda); margin: 8px 0; }
+.barra-ociosa span { display: block; height: 100%; background: linear-gradient(90deg, var(--ouro-escuro), var(--ouro)); }
+.ganhos { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--suave); }
+.ganhos span b { color: var(--ouro); font-weight: normal; }
+
+/* ---------------------------------------------------------------- heróis */
+.grade-herois { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.carta-heroi {
+  background: #191527;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  text-align: center;
+}
+.carta-heroi.na-hoste { border-color: var(--ouro); box-shadow: 0 0 0 1px rgba(232,196,90,0.25) inset; }
+.carta-heroi canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; display: block; }
+.carta-heroi .nome { font-size: 12px; margin-top: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.carta-heroi .estrelas { font-size: 10px; color: var(--ouro); letter-spacing: -1px; display: block; }
+.carta-heroi .classe { position: absolute; bottom: 44px; right: 10px; font-size: 11px; opacity: 0.85; }
+.carta-heroi .nivel {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(10,8,16,0.8); border-radius: 5px; padding: 1px 5px; font-size: 10px;
+}
+.faixa-raridade { position: absolute; top: 8px; right: 8px; width: 9px; height: 9px; border-radius: 50%; }
+
+.detalhe-topo { display: flex; gap: 12px; }
+.detalhe-topo canvas { width: 104px; height: 104px; border-radius: 10px; border: 1px solid var(--borda); flex: none; }
+.atributos { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin: 10px 0; font-size: 13px; }
+.atributos div { display: flex; justify-content: space-between; border-bottom: 1px dotted #2f2942; padding: 2px 0; }
+.atributos span { color: var(--suave); }
+
+.habilidade { background: #171426; border: 1px solid var(--borda); border-radius: 8px; padding: 8px; margin-top: 8px; }
+.habilidade b { color: var(--ouro); font-size: 13px; }
+.habilidade small { display: block; color: var(--suave); font-size: 12px; margin-top: 3px; line-height: 1.4; }
+
+.reliquias { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.reliquia { background: #171426; border: 1px solid var(--borda); border-radius: 8px; padding: 6px; text-align: center; font-size: 11px; cursor: pointer; }
+.reliquia b { display: block; color: var(--ouro); font-size: 14px; }
+
+.filtros { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.filtro {
+  background: #191527; border: 1px solid var(--borda); color: var(--suave);
+  border-radius: 20px; padding: 4px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.filtro.ativo { border-color: var(--ouro); color: var(--ouro); }
+
+/* ------------------------------------------------------------- invocação */
+.resultado-invocacao { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; margin-top: 10px; }
+.novo-heroi { position: relative; text-align: center; background: #191527; border: 1px solid var(--borda); border-radius: 10px; padding: 6px; }
+.novo-heroi canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; }
+.novo-heroi .nome, .novo-heroi .estrelas { display: block; font-size: 12px; margin-top: 3px; }
+.novo-heroi .estrelas { font-size: 10px; }
+.selo-novo { position: absolute; top: 4px; right: 4px; background: var(--ouro); color: #1a1410; font-size: 9px; border-radius: 4px; padding: 1px 4px; }
+
+.taxas { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--suave); margin-top: 8px; }
+.taxas b { font-weight: normal; }
+
+/* --------------------------------------------------------------- missões */
+.missao { display: flex; align-items: center; gap: 10px; background: #171426; border: 1px solid var(--borda); border-radius: 8px; padding: 8px; margin-top: 8px; }
+.missao .info { flex: 1; }
+.missao .info small { color: var(--suave); font-size: 11px; }
+.barra-missao { height: 5px; background: #0f0d18; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.barra-missao span { display: block; height: 100%; background: var(--verde); }
+.botao-mini {
+  border: 1px solid var(--ouro-escuro); background: #2d2412; color: var(--ouro);
+  border-radius: 8px; padding: 6px 10px; font-size: 12px; font-family: inherit; cursor: pointer;
+}
+.botao-mini[disabled] { opacity: 0.4; }
+
+/* ----------------------------------------------------------------- menu */
+.menu {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  background: linear-gradient(180deg, rgba(18,16,26,0.92), #14111d);
+  border-top: 1px solid var(--borda);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 20;
+}
+.aba {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--suave);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 8px 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.aba span { font-size: 17px; }
+.aba.ativa { color: var(--ouro); }
+
+/* -------------------------------------------------------------- batalha */
+.batalha {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: #0c0a14;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+.batalha.oculta, .oculta { display: none !important; }
+.batalha-topo { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; gap: 8px; }
+.batalha-topo strong { display: block; font-size: 15px; color: var(--ouro); }
+.batalha-topo small { color: var(--suave); font-size: 11px; }
+.batalha-controles { display: flex; gap: 5px; }
+.mini {
+  background: #1e1a2c; border: 1px solid var(--borda); color: var(--suave);
+  border-radius: 7px; padding: 6px 9px; font-size: 12px; font-family: inherit; cursor: pointer;
+}
+.mini.ativa { border-color: var(--ouro); color: var(--ouro); }
+.mini.destaque { border-color: var(--ouro-escuro); color: var(--ouro); }
+
+#palco { display: block; margin: 0 auto; background: #0a0812; image-rendering: pixelated; }
+
+.grade-estagios { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; }
+.grade-estagios .filtro { text-align: center; padding: 8px 0; }
+
+.log {
+  flex: 1;
+  min-height: 84px;
+  max-height: 34vh;
+  overflow-y: auto;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--suave);
+}
+.linha-log { opacity: 0.9; }
+.log-aliado { color: var(--verde); }
+.log-inimigo { color: var(--vermelho); }
+.log-passiva { color: var(--ouro); }
+
+.resultado {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 14, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+  z-index: 5;
+}
+.resultado h2 { font-size: 30px; margin: 0 0 6px; }
+.resultado .vitoria { color: var(--ouro); }
+.resultado .derrota { color: var(--vermelho); }
+.resultado .botao { max-width: 260px; }
+
+/* --------------------------------------------------------------- modais */
+.modal { position: fixed; inset: 0; background: rgba(6,5,10,0.78); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.modal-caixa {
+  background: linear-gradient(180deg, var(--painel), var(--fundo-alto));
+  border: 1px solid var(--borda);
+  border-radius: 14px 14px 0 0;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  position: relative;
+}
+.fechar {
+  position: absolute; top: 10px; right: 10px;
+  background: none; border: none; color: var(--suave); font-size: 18px; cursor: pointer;
+}
+
+.avisos { position: fixed; left: 0; right: 0; bottom: 74px; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 60; pointer-events: none; }
+.aviso {
+  background: rgba(28,24,42,0.96);
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  animation: subir 0.25s ease;
+}
+@keyframes subir { from { transform: translateY(8px); opacity: 0; } }
+
+@media (min-width: 620px) {
+  body { font-size: 16px; }
+  .batalha { justify-content: center; }
+  .batalha-topo, .log { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .log { max-height: 26vh; }
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#12101a">
+<title>Crônicas da Aliança — RPG Idle Bíblico</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<div id="app">
+  <header id="barra">
+    <div class="marca">
+      <span class="marca-icone">✦</span>
+      <div>
+        <strong>Crônicas da Aliança</strong>
+        <small id="subtitulo">A hoste desperta</small>
+      </div>
+    </div>
+    <div id="recursos" class="recursos"></div>
+  </header>
+
+  <main id="tela" class="tela"></main>
+
+  <nav id="menu" class="menu">
+    <button class="aba" data-tela="campanha"><span>⚔</span>Campanha</button>
+    <button class="aba" data-tela="herois"><span>🛡</span>Hoste</button>
+    <button class="aba" data-tela="invocacao"><span>✦</span>Invocação</button>
+    <button class="aba" data-tela="torre"><span>🗼</span>Torre</button>
+    <button class="aba" data-tela="missoes"><span>📜</span>Missões</button>
+  </nav>
+</div>
+
+<div id="batalha" class="batalha oculta">
+  <div class="batalha-topo">
+    <div>
+      <strong id="batalha-titulo">Batalha</strong>
+      <small id="batalha-sub"></small>
+    </div>
+    <div class="batalha-controles">
+      <button class="mini" data-velocidade="1">×1</button>
+      <button class="mini" data-velocidade="2">×2</button>
+      <button class="mini" data-velocidade="4">×4</button>
+      <button class="mini destaque" id="pular">Pular</button>
+    </div>
+  </div>
+  <canvas id="palco"></canvas>
+  <div id="log" class="log"></div>
+  <div id="resultado" class="resultado oculta"></div>
+</div>
+
+<div id="modal" class="modal oculta">
+  <div class="modal-caixa">
+    <button class="fechar" id="modal-fechar">✕</button>
+    <div id="modal-conteudo"></div>
+  </div>
+</div>
+
+<div id="avisos" class="avisos"></div>
+
+<script src="src/nucleo/util.js"></script>
+<script src="src/nucleo/formulas.js"></script>
+<script src="src/dados/herois.js"></script>
+<script src="src/dados/campanha.js"></script>
+<script src="src/combate/motor.js"></script>
+<script src="src/combate/arte.js"></script>
+<script src="src/combate/cena.js"></script>
+<script src="src/nucleo/estado.js"></script>
+<script src="src/ui/interface.js"></script>
+<script src="src/ui/campanha.js"></script>
+<script src="src/ui/herois.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>
