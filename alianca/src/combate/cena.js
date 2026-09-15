@@ -13,7 +13,7 @@
   const LARGURA_MAXIMA = 760;
   const HORIZONTE = 118;
   const ESCALA_UNIDADE = 1.25;
-  const ALTO_SPRITE = Math.round(48 * ESCALA_UNIDADE);
+  const ALTO_SPRITE = Math.round(60 * ESCALA_UNIDADE);
 
   const C = { canvas: null, ctx: null, log: null, estado: null, animacao: null, velocidade: 1 };
   let fundoCache = { chave: null, canvas: null };
@@ -64,19 +64,59 @@
     ctx.fill();
   }
 
+  // Uma cadeia de montanhas com o perfil quebrado e um fio de luz na crista.
+  function serra(ctx, quantidade, passo, alturaBase, variacao, cor, corCrista) {
+    for (let i = 0; i < quantidade; i++) {
+      const x = i * passo - 30;
+      const h = alturaBase + ((i * 41) % variacao);
+      const meio = x + passo * 0.64;
+      const pontos = [
+        [x, HORIZONTE],
+        [x + passo * 0.2, HORIZONTE - h * 0.42],
+        [x + passo * 0.34, HORIZONTE - h * 0.34],
+        [x + passo * 0.48, HORIZONTE - h * 0.82],
+        [meio, HORIZONTE - h],
+        [meio + passo * 0.16, HORIZONTE - h * 0.74],
+        [meio + passo * 0.3, HORIZONTE - h * 0.8],
+        [x + passo * 1.28, HORIZONTE],
+      ];
+      ctx.fillStyle = cor;
+      ctx.beginPath();
+      ctx.moveTo(pontos[0][0], pontos[0][1]);
+      pontos.forEach((p) => ctx.lineTo(p[0], p[1]));
+      ctx.closePath();
+      ctx.fill();
+      if (corCrista) {
+        ctx.strokeStyle = corCrista;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pontos[3][0], pontos[3][1]);
+        ctx.lineTo(pontos[4][0], pontos[4][1]);
+        ctx.lineTo(pontos[5][0], pontos[5][1]);
+        ctx.stroke();
+      }
+    }
+  }
+
   const CENARIOS = {
     arvores(ctx, cor, luz) {
       for (let i = 0; i < 10; i++) {
         const x = 8 + i * 50 + (i % 2) * 14;
         const alt = 30 + ((i * 17) % 20);
-        ctx.fillStyle = A.escurecer(cor, 0.4);
-        ctx.fillRect(x - 2, HORIZONTE - alt + 12, 4, alt - 10);
+        const base = HORIZONTE - alt + 12;
+        ctx.fillStyle = A.escurecer(cor, 0.34);
+        ctx.fillRect(x - 2, base, 4, alt - 10);
+        ctx.fillRect(x - 5, base + 4, 3, 2);
+        // copa em três camadas, a de cima mais clara
+        [[0, 0, 13, 0.4], [-5, -6, 9, 0.5], [6, -7, 8, 0.58]].forEach(([dx, dy, r, tomLuz]) => {
+          ctx.fillStyle = A.escurecer(cor, 0.34 + tomLuz * 0.25);
+          ctx.beginPath();
+          ctx.ellipse(x + dx, base - 4 + dy, r, r * 0.82, 0, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.fillStyle = A.comAlfa(luz, 0.16);
         ctx.beginPath();
-        ctx.ellipse(x, HORIZONTE - alt + 8, 14, 11, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = A.comAlfa(luz, 0.18);
-        ctx.beginPath();
-        ctx.ellipse(x - 4, HORIZONTE - alt + 4, 7, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 4, base - 13, 5, 3.4, 0, 0, Math.PI * 2);
         ctx.fill();
       }
     },
@@ -248,28 +288,24 @@
       ctx.fillRect(x, y, i % 4 === 0 ? 2 : 1, i % 4 === 0 ? 2 : 1);
     }
 
-    // nuvens finas
-    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    // nuvens em bolhas, não em tijolos
     for (let i = 0; i < 5; i++) {
       const x = (i * 121) % L;
-      const y = 26 + ((i * 37) % 44);
-      ctx.fillRect(x, y, 70 + (i % 3) * 30, 4);
-      ctx.fillRect(x + 16, y - 4, 40, 4);
+      const y = 24 + ((i * 37) % 42);
+      const largura = 26 + (i % 3) * 10;
+      ctx.fillStyle = "rgba(255,255,255,0.07)";
+      [[0, 0, 1], [0.7, -0.35, 0.72], [-0.68, -0.22, 0.6], [1.35, 0.12, 0.5]].forEach(([dx, dy, e]) => {
+        ctx.beginPath();
+        ctx.ellipse(x + dx * largura, y + dy * largura * 0.5, largura * e, largura * e * 0.34, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
 
-    // serras ao longe: quanto mais distante, mais perto da cor do céu
-    for (let i = 0; i < 8; i++) {
-      const x = i * 70 - 30;
-      const h = 30 + ((i * 41) % 26);
-      tri(ctx, x, HORIZONTE, x + 45, HORIZONTE - h, x + 90, HORIZONTE, A.escurecer(luz, 0.62));
-    }
+    // serras ao longe: silhueta recortada, e quanto mais distante mais clara
+    serra(ctx, 8, 70, 30, 26, A.escurecer(luz, 0.62), null);
     ctx.fillStyle = A.comAlfa(luz, 0.25);
     ctx.fillRect(0, HORIZONTE - 22, L, 22);
-    for (let i = 0; i < 6; i++) {
-      const x = i * 96 - 10;
-      const h = 44 + ((i * 53) % 30);
-      tri(ctx, x, HORIZONTE, x + 55, HORIZONTE - h, x + 110, HORIZONTE, A.escurecer(luz, 0.42));
-    }
+    serra(ctx, 6, 96, 44, 30, A.escurecer(luz, 0.42), A.comAlfa(luz, 0.7));
     ctx.fillStyle = A.comAlfa(luz, 0.16);
     ctx.fillRect(0, HORIZONTE - 10, L, 10);
 

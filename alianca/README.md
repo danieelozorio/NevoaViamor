@@ -51,14 +51,19 @@ uma batalha equilibrada tem de 4 a 12 supremas. Controles de velocidade (×1/×2
 ### Visual
 Tudo é desenhado por código, sem uma única imagem externa:
 
-- **Sprites** montados com retângulos, com contorno, sombreamento e silhueta própria por classe
-  (elmo com crista, capuz do vidente, turbante do sacerdote, diadema do arauto), mais coroa da
-  Realeza, asas e auréola dos Celestiais e aura roxa das Trevas. Cada corpo é renderizado uma vez
-  num canvas fora de tela e reaproveitado; só o adereço da mão gira junto com o golpe.
+- **Sprites** montados **linha a linha**: para cada altura calcula-se a largura, que é o que faz
+  ombro, capa, capuz, barba e coroa saírem arredondados em vez de empilhados em blocos. Cada figura
+  tem contorno escuro, três tons por material (base, sombra à direita, luz à esquerda) e silhueta
+  própria por classe — elmo com protetor nasal e crista, capuz do vidente com o rosto na penumbra e
+  olhos acesos, turbante do sacerdote, diadema do arauto —, mais coroa e cetro da Realeza, asas e
+  auréola dos Celestiais e aura roxa das Trevas. A armadura é tingida com a cor do manto de cada
+  herói, para dois guerreiros nunca saírem iguais. Os adereços (cajado, arco, harpa, jarro, funda,
+  trombeta, rolo, cetro…) são desenhados pela mesma técnica e ganham o mesmo contorno. Cada corpo é
+  renderizado uma vez num canvas fora de tela e reaproveitado; só o adereço da mão gira com o golpe.
 - **Animação** — respiração parada, investida no ataque, recuo ao apanhar, clarão branco na
   silhueta, tombo com rotação na morte e anel dourado sob quem está agindo.
-- **Cenário em camadas** por capítulo: céu em degradê com astro, nuvens e estrelas, duas serras com
-  perspectiva atmosférica, um elemento próprio de cada capítulo (árvores do Éden, pirâmides, dunas,
+- **Cenário em camadas** por capítulo: céu em degradê com astro, nuvens em bolhas e estrelas, duas
+  cadeias de montanhas de perfil recortado com perspectiva atmosférica, um elemento próprio de cada capítulo (árvores do Éden, pirâmides, dunas,
   as muralhas de Jericó, tendas, a cidade, o altar do Carmelo, o zigurate da Babilônia, o abismo e o
   horizonte em chamas), chão com trilha central e silhuetas em primeiro plano, tudo sob vinheta.
 - **Ilustrações próprias (opcional)** — largar um `alianca/arte/<id>.png` com fundo transparente
