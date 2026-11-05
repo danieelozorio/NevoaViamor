@@ -386,7 +386,7 @@
       if (S.filtro.status === 'atrasados' && !(ABERTOS.includes(t.status) && prazoInfo(t).atrasado)) return false;
       if (STATUS[S.filtro.status] && t.status !== S.filtro.status) return false;
       if (S.filtro.tipo && t.tipo !== S.filtro.tipo) return false;
-      if (S.filtro.destino && (S.filtro.destino === 'sem' ? t.destino : t.destino !== S.filtro.destino)) return false;
+      if (!passaDestino(t)) return false;
       if (S.filtro.loja && t.loja_id !== S.filtro.loja) return false;
       if (q) {
         const alvo = [t.protocolo, t.loja_nome, t.loja_cidade, t.loja_contato, t.nf, t.motivo].concat((t.itens || []).flatMap((i) => [i.sku, i.produto])).join(' ').toLowerCase();
@@ -413,12 +413,16 @@
       <span class="cell c-status"><span class="pill s-${esc(t.status)}">${esc(STATUS[t.status])}</span></span>
     </button>`;
   }
+  // Destino escolhido na fila (vazio = todos; 'sem' = chamados antigos, sem destino).
+  const passaDestino = (t) => !S.filtro.destino || (S.filtro.destino === 'sem' ? !t.destino : t.destino === S.filtro.destino);
   function renderFila() {
-    const abertos = S.tickets.filter((t) => ABERTOS.includes(t.status));
+    // Os números do topo e o contador de atrasados seguem o destino escolhido.
+    const doDestino = S.tickets.filter(passaDestino);
+    const abertos = doDestino.filter((t) => ABERTOS.includes(t.status));
     const atrasados = abertos.filter((t) => prazoInfo(t).atrasado).length;
     const aguard = abertos.filter((t) => t.status === 'aguardando').length;
     const semana = Date.now() - 7 * 864e5;
-    const resolvidos = S.tickets.filter((t) => t.status === 'resolvido' && new Date(t.atualizado_em).getTime() >= semana).length;
+    const resolvidos = doDestino.filter((t) => t.status === 'resolvido' && new Date(t.atualizado_em).getTime() >= semana).length;
     $('n-atrasados').hidden = !atrasados; $('n-atrasados').textContent = atrasados;
     $('kpis').innerHTML = [
       ['abertos', 'Em aberto', abertos.length, ''], ['atrasados', 'Atrasados', atrasados, atrasados ? 'bad' : ''],
@@ -429,7 +433,7 @@
     if (S.filtro.loja) $('filtro-loja-nome').textContent = S.filtro.lojaNome;
     $('lista').innerHTML = !S.tickets.length
       ? '<div class="empty"><b>Nenhum chamado ainda</b><span>Mande o link da aba "Link para as lojas". Quando a primeira loja enviar, o chamado aparece aqui na hora.</span></div>'
-      : !lista.length ? '<div class="empty"><b>Nada com esses filtros</b><span>Mude o status ou limpe a busca.</span></div>'
+      : !lista.length ? `<div class="empty"><b>Nada com esses filtros</b><span>Mude o status ou limpe a busca.${S.filtro.destino && S.filtro.destino !== 'sem' ? ' Chamados abertos antes de existir a escolha de destino aparecem em "Sem destino (antigos)".' : ''}</span></div>`
       : cabecalho + lista.map(linha).join('');
   }
   $('fs').innerHTML = [['abertos', 'Em aberto'], ['atrasados', 'Atrasados'], ['todos', 'Todos os status']].concat(Object.entries(STATUS))
