@@ -31,6 +31,8 @@
     const tipos = itens.map((i) => MOTIVO_TIPO[i.motivo]).filter(Boolean);
     return ['avaria', 'devolucao', 'reclamacao'].find((t) => tipos.includes(t)) || 'duvida';
   }
+  // Para quem é o chamado.
+  const DESTINOS = { unisuper: 'UniSuper', victos_horti: 'Victos Horti', victos_perecivel: 'Victos Perecível', buongusto: 'Buongusto' };
   const DECISOES = { pendente: 'Em análise', aceito: 'Aceito', recusado: 'Recusado' };
   // Fotos e vídeos aceitos: tipo do arquivo -> extensão usada no armazenamento.
   const MIME_EXT = {
@@ -141,5 +143,5 @@
     return '<div class="banner"><div><b>Site ainda não conectado ao banco de dados.</b> Preencha o arquivo <span class="mono">config.js</span> com a URL e a chave do Supabase (veja o passo a passo no README).</div></div>';
   }
 
-  window.SAC = { TIPOS, STATUS, ABERTOS, PRIORIDADES, DECISOES, MOTIVOS_ITEM, tipoPelosItens, fmtNum, fmtQtd, lerQtd, MIME_EXT, MAX_ARQUIVO, ehVideo, tipoArquivo, tamanho, decisaoTexto, $, esc, soDigitos, store, prazoDe, prazoInfo, dur, quando, waNumero, foneBonito, toast, copiar, cliente, mensagemErro, configPendente };
+  window.SAC = { TIPOS, STATUS, ABERTOS, PRIORIDADES, DECISOES, DESTINOS, MOTIVOS_ITEM, tipoPelosItens, fmtNum, fmtQtd, lerQtd, MIME_EXT, MAX_ARQUIVO, ehVideo, tipoArquivo, tamanho, decisaoTexto, $, esc, soDigitos, store, prazoDe, prazoInfo, dur, quando, waNumero, foneBonito, toast, copiar, cliente, mensagemErro, configPendente };
 })();

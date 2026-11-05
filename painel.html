@@ -73,6 +73,7 @@
       <input type="search" id="q" placeholder="Buscar por protocolo, loja, CNPJ, nota ou produto" aria-label="Buscar">
       <select id="fs" aria-label="Status"></select>
       <select id="ft" aria-label="Tipo"></select>
+      <select id="fd" aria-label="Destino"></select>
     </div>
     <div class="chip-filtro" id="filtro-loja" hidden>Mostrando só os chamados de <b id="filtro-loja-nome"></b><button class="btn small" type="button" id="filtro-loja-limpar">Ver todas as lojas</button></div>
     <div class="list" id="lista"></div>
@@ -92,6 +93,7 @@
         <label class="f">De<input type="date" id="rl-de"></label>
         <label class="f">Até<input type="date" id="rl-ate"></label>
         <label class="f">Loja<select id="rl-loja"></select></label>
+        <label class="f">Destino<select id="rl-destino"></select></label>
         <label class="f">Tipo<select id="rl-tipo"></select></label>
         <label class="f">Motivo do produto<select id="rl-motivo"></select></label>
         <label class="f">Produto<input type="search" id="rl-prod" placeholder="Código ou nome"></label>
@@ -260,10 +262,10 @@
 <script src="comum.js"></script>
 <script>
 (function () {
-  const { TIPOS, STATUS, ABERTOS, PRIORIDADES, DECISOES, MOTIVOS_ITEM, ehVideo, decisaoTexto, fmtNum, fmtQtd, lerQtd, $, esc, soDigitos, prazoDe, prazoInfo, quando, waNumero, foneBonito, toast, copiar, mensagemErro } = window.SAC;
+  const { TIPOS, STATUS, ABERTOS, PRIORIDADES, DECISOES, DESTINOS, MOTIVOS_ITEM, ehVideo, decisaoTexto, fmtNum, fmtQtd, lerQtd, $, esc, soDigitos, prazoDe, prazoInfo, quando, waNumero, foneBonito, toast, copiar, mensagemErro } = window.SAC;
   const cfg = window.SAC_CONFIG || {};
   const sb = window.SAC.cliente();
-  const S = { uid: null, email: '', tickets: [], equipe: {}, view: 'fila', aberto: null, msgs: [], midias: [], renderPendente: false, filtro: { q: '', status: 'abertos', tipo: '' }, ocupado: false, canal: null, ultimaResposta: '' };
+  const S = { uid: null, email: '', tickets: [], equipe: {}, view: 'fila', aberto: null, msgs: [], midias: [], renderPendente: false, filtro: { q: '', status: 'abertos', tipo: '', destino: (window.SAC.store.get('sac.painelDestino') || '') }, ocupado: false, canal: null, ultimaResposta: '' };
   const linkLoja = new URL('./', location.href).href;
 
     if (!sb) { $('banners').innerHTML = window.SAC.configPendente(); return; }
@@ -384,6 +386,7 @@
       if (S.filtro.status === 'atrasados' && !(ABERTOS.includes(t.status) && prazoInfo(t).atrasado)) return false;
       if (STATUS[S.filtro.status] && t.status !== S.filtro.status) return false;
       if (S.filtro.tipo && t.tipo !== S.filtro.tipo) return false;
+      if (S.filtro.destino && (S.filtro.destino === 'sem' ? t.destino : t.destino !== S.filtro.destino)) return false;
       if (S.filtro.loja && t.loja_id !== S.filtro.loja) return false;
       if (q) {
         const alvo = [t.protocolo, t.loja_nome, t.loja_cidade, t.loja_contato, t.nf, t.motivo].concat((t.itens || []).flatMap((i) => [i.sku, i.produto])).join(' ').toLowerCase();
@@ -405,7 +408,7 @@
     return `<button class="row" type="button" data-id="${esc(t.id)}">
       <span class="cell c-prot mono sub">${esc(t.protocolo)}</span>
       <span class="cell c-loja"><span class="loja" style="display:block">${esc(t.loja_nome)}${pri}</span><span class="sub" style="display:block">${esc(t.loja_cidade || t.loja_contato)}</span></span>
-      <span class="cell c-tipo"><span style="display:block;font-weight:600">${esc(TIPOS[t.tipo]?.rot || t.tipo)}</span><span class="sub" style="display:block">${esc(t.motivo)}${resumoItens(t)}${t.responsavel ? ' · ' + esc(nome(t.responsavel)) : ''}</span></span>
+      <span class="cell c-tipo"><span style="display:block;font-weight:600">${esc(TIPOS[t.tipo]?.rot || t.tipo)}${t.destino ? ` <span class="tag-dest">${esc(DESTINOS[t.destino] || t.destino)}</span>` : ''}</span><span class="sub" style="display:block">${esc(t.motivo)}${resumoItens(t)}${t.responsavel ? ' · ' + esc(nome(t.responsavel)) : ''}</span></span>
       <span class="cell c-prazo prazo ${p.cls}">${esc(p.txt)}</span>
       <span class="cell c-status"><span class="pill s-${esc(t.status)}">${esc(STATUS[t.status])}</span></span>
     </button>`;
@@ -435,6 +438,10 @@
   $('q').addEventListener('input', () => { S.filtro.q = $('q').value.trim(); renderFila(); });
   $('fs').addEventListener('change', () => { S.filtro.status = $('fs').value; renderFila(); });
   $('ft').addEventListener('change', () => { S.filtro.tipo = $('ft').value; renderFila(); });
+  // Destino: cada pessoa costuma cuidar de um; a escolha fica lembrada neste aparelho.
+  $('fd').innerHTML = '<option value="">Todos os destinos</option>' + Object.entries(DESTINOS).map(([k, r]) => `<option value="${k}">${esc(r)}</option>`).join('') + '<option value="sem">Sem destino (antigos)</option>';
+  $('fd').value = S.filtro.destino;
+  $('fd').addEventListener('change', () => { S.filtro.destino = $('fd').value; window.SAC.store.set('sac.painelDestino', S.filtro.destino); renderFila(); });
   $('kpis').addEventListener('click', (e) => {
     const b = e.target.closest('[data-filtro]');
     if (b) { S.filtro.status = b.dataset.filtro; $('fs').value = S.filtro.status; renderFila(); }
@@ -522,6 +529,7 @@
       </div>
       <div class="box"><h3>${esc(TIPOS[t.tipo]?.rot || t.tipo)}</h3>
         <dl class="kv">
+          <dt>Para</dt><dd><b>${esc(DESTINOS[t.destino] || 'Não informado')}</b></dd>
           <dt>Motivo</dt><dd>${esc(t.motivo)}</dd>
           <dt>Nota / pedido</dt><dd class="mono">${esc(t.nf || '—')}</dd>
           <dt>Aberto em</dt><dd>${esc(quando(t.criado_em))}</dd>
@@ -653,16 +661,16 @@
   }
 
   function textoWhats(t, corpo) {
-    return `Olá, ${t.loja_contato}! Aqui é o SAC${cfg.empresa ? ' da ' + cfg.empresa : ''}.\nChamado ${t.protocolo} (${TIPOS[t.tipo]?.rot || ''}):\n` +
+    return `Olá, ${t.loja_contato}! Aqui é o SAC${t.destino ? ' ' + DESTINOS[t.destino] : cfg.empresa ? ' da ' + cfg.empresa : ''}.\nChamado ${t.protocolo} (${TIPOS[t.tipo]?.rot || ''}):\n` +
       (corpo || 'O status agora é: ' + STATUS[t.status] + '.') + `\n\nAcompanhe em: ${linkLoja}#acompanhar`;
   }
 
   // ---------- exportação ----------
   $('btn-csv').addEventListener('click', () => {
-    const cols = ['Protocolo', 'Tipo', 'Motivo', 'Status', 'Prioridade', 'Loja', 'CNPJ', 'Cidade', 'Contato', 'WhatsApp', 'Nota/Pedido', 'SKU', 'Produto', 'Quantidade', 'Unidade', 'Motivo do produto', 'Decisão', 'Qtd. aceita', 'Justificativa', 'Descrição', 'Responsável', 'Aberto em', 'Prazo', 'Atualizado em', 'Atrasado'];
+    const cols = ['Protocolo', 'Destino', 'Tipo', 'Motivo', 'Status', 'Prioridade', 'Loja', 'CNPJ', 'Cidade', 'Contato', 'WhatsApp', 'Nota/Pedido', 'SKU', 'Produto', 'Quantidade', 'Unidade', 'Motivo do produto', 'Decisão', 'Qtd. aceita', 'Justificativa', 'Descrição', 'Responsável', 'Aberto em', 'Prazo', 'Atualizado em', 'Atrasado'];
     const cel = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
     // Uma linha por produto, para dar para filtrar e somar as devoluções aceitas na planilha.
-    const linhas = filtrados().flatMap((t) => ((t.itens || []).length ? t.itens : [{}]).map((i) => [t.protocolo, TIPOS[t.tipo]?.rot, t.motivo, STATUS[t.status], PRIORIDADES[t.prioridade],
+    const linhas = filtrados().flatMap((t) => ((t.itens || []).length ? t.itens : [{}]).map((i) => [t.protocolo, DESTINOS[t.destino] || '', TIPOS[t.tipo]?.rot, t.motivo, STATUS[t.status], PRIORIDADES[t.prioridade],
       t.loja_nome, t.loja_cnpj, t.loja_cidade, t.loja_contato, foneBonito(t.loja_whatsapp), t.nf, i.sku, i.produto, i.quantidade != null ? String(Number(i.quantidade)).replace('.', ',') : '', i.quantidade != null ? (i.unidade || 'un') : '', i.motivo,
       i.decisao ? DECISOES[i.decisao] : '', i.qtd_aceita != null ? String(Number(i.qtd_aceita)).replace('.', ',') : '', i.justificativa, t.descricao, t.responsavel ? nome(t.responsavel) : '', quando(t.criado_em),
       quando(prazoDe(t).toISOString()), quando(t.atualizado_em), prazoInfo(t).atrasado ? 'Sim' : 'Não'].map(cel).join(';')));
@@ -780,7 +788,7 @@
     if (acao === 'msg') copiar(mensagemLoja(l));
     if (acao === 'editar') { abrirForm(l); window.scrollTo(0, 0); }
     if (acao === 'chamados') {
-      S.filtro = { q: '', status: 'todos', tipo: '', loja: l.id, lojaNome: l.nome };
+      S.filtro = { q: '', status: 'todos', tipo: '', destino: S.filtro.destino, loja: l.id, lojaNome: l.nome };
       $('q').value = ''; $('fs').value = 'todos'; $('ft').value = '';
       S.view = 'fila'; mostrar('fila'); renderFila(); window.scrollTo(0, 0);
     }
@@ -810,6 +818,7 @@
   function abrirRelatorios() {
     if (!$('rl-tipo').options.length) {
       $('rl-tipo').innerHTML = '<option value="">Todos</option>' + Object.entries(TIPOS).map(([k, t]) => `<option value="${k}">${esc(t.rot)}</option>`).join('');
+      $('rl-destino').innerHTML = '<option value="">Todos</option>' + Object.entries(DESTINOS).map(([k, r]) => `<option value="${k}">${esc(r)}</option>`).join('') + '<option value="sem">Sem destino (antigos)</option>';
       $('rl-motivo').innerHTML = '<option value="">Todos</option>' + MOTIVOS_ITEM.map((m) => `<option>${esc(m)}</option>`).join('');
     }
     const atual = $('rl-loja').value;
@@ -827,7 +836,7 @@
     const fim = dataLocal(ate); fim.setDate(fim.getDate() + 1);
     const todos = [];
     for (let i = 0; ; i += 1000) {
-      const { data, error } = await sb.from('chamados').select('id, protocolo, tipo, motivo, status, loja_id, loja_nome, criado_em, itens:chamado_itens(*)')
+      const { data, error } = await sb.from('chamados').select('id, protocolo, destino, tipo, motivo, status, loja_id, loja_nome, criado_em, itens:chamado_itens(*)')
         .gte('criado_em', dataLocal(de).toISOString()).lt('criado_em', fim.toISOString()).order('criado_em').range(i, i + 999);
       if (R.carregando !== chave) return; // o período mudou enquanto carregava
       if (error) { $('rl-corpo').innerHTML = `<div class="empty"><b>Não foi possível carregar o relatório</b><span>${esc(mensagemErro(error))}</span></div>`; return; }
@@ -838,7 +847,7 @@
     renderRelatorio();
   }
   ['rl-de', 'rl-ate'].forEach((id) => $(id).addEventListener('change', () => { document.querySelectorAll('[data-per]').forEach((b) => b.setAttribute('aria-pressed', 'false')); carregarRelatorio(); }));
-  ['rl-loja', 'rl-tipo', 'rl-motivo'].forEach((id) => $(id).addEventListener('change', renderRelatorio));
+  ['rl-loja', 'rl-destino', 'rl-tipo', 'rl-motivo'].forEach((id) => $(id).addEventListener('change', renderRelatorio));
   $('rl-prod').addEventListener('input', renderRelatorio);
   document.querySelector('.rl-periodo').addEventListener('click', (e) => { const b = e.target.closest('[data-per]'); if (b) definirPeriodo(b.dataset.per); });
 
@@ -851,7 +860,7 @@
   }
   // Aplica loja, tipo, motivo e produto. Chamados contam quando têm algum produto que passa nos filtros de produto.
   function filtrarRelatorio() {
-    const loja = $('rl-loja').value, tipo = $('rl-tipo').value, motivo = $('rl-motivo').value;
+    const loja = $('rl-loja').value, tipo = $('rl-tipo').value, motivo = $('rl-motivo').value, destino = $('rl-destino').value;
     const q = semAcento($('rl-prod').value.trim());
     const prodOk = (i) => (!motivo || i.motivo === motivo) && (!q || String(i.sku || '').toLowerCase().startsWith(q) || q.split(/\s+/).every((w) => semAcento(i.produto).includes(w)));
     const porItem = !!(motivo || q);
@@ -859,6 +868,7 @@
     R.dados.forEach((t) => {
       if (loja && t.loja_id !== loja) return;
       if (tipo && t.tipo !== tipo) return;
+      if (destino && (destino === 'sem' ? t.destino : t.destino !== destino)) return;
       const its = (t.itens || []).filter(prodOk);
       if (porItem && !its.length) return;
       chamados.push(t);
@@ -884,6 +894,7 @@
     // Filtros ativos, para a pessoa saber o que está olhando e limpar com um toque.
     const ativos = [];
     if ($('rl-loja').value) ativos.push(['rl-loja', 'Loja: ' + $('rl-loja').selectedOptions[0].textContent]);
+    if ($('rl-destino').value) ativos.push(['rl-destino', 'Destino: ' + $('rl-destino').selectedOptions[0].textContent]);
     if ($('rl-tipo').value) ativos.push(['rl-tipo', 'Tipo: ' + $('rl-tipo').selectedOptions[0].textContent]);
     if ($('rl-motivo').value) ativos.push(['rl-motivo', 'Motivo: ' + $('rl-motivo').value]);
     if ($('rl-prod').value.trim()) ativos.push(['rl-prod', 'Produto: ' + $('rl-prod').value.trim()]);
@@ -945,6 +956,10 @@
       tip: `${m}: ${l.length} produto${l.length === 1 ? '' : 's'}` + (somarQtd(l) ? ` (${somarQtd(l)})` : '') + ` · ${Math.round(l.length / itens.length * 100)}% do total`
     }));
 
+    const destMap = {}; chamados.forEach((t) => { const k = t.destino || 'sem'; destMap[k] = (destMap[k] || 0) + 1; });
+    const porDestino = Object.entries(destMap).sort((a, b) => b[1] - a[1]).map(([k, n]) => ({
+      rotulo: DESTINOS[k] || 'Sem destino (antigos)', valor: n, filtro: k,
+      tip: `${DESTINOS[k] || 'Sem destino'}: ${n} chamado${n === 1 ? '' : 's'} · ${Math.round(n / chamados.length * 100)}% do total` }));
     const pct = (n) => decididos ? Math.round(n / decididos * 100) + '%' : '—';
     const decisaoBarra = itens.length ? `<div class="rl-decisao" role="img" aria-label="Decisões: ${aceitos.length} aceitos, ${recusados.length} recusados, ${pend.length} a decidir">
         ${[['aceito', aceitos.length, 'Aceitos'], ['recusado', recusados.length, 'Recusados'], ['pendente', pend.length, 'A decidir']].filter((x) => x[1]).map(([k, n, r]) =>
@@ -968,6 +983,7 @@
         <section class="card rl-graf rl-largo"><h2>Chamados ${nomeEscala}</h2>${colunas}</section>
         <section class="card rl-graf"><h2>Lojas que mais abrem chamados</h2>${barras(topLojas, { acao: 'rl-loja', vazio: 'Sem lojas no período.' })}</section>
         <section class="card rl-graf"><h2>Produtos que mais dão problema</h2>${barras(topProd, { acao: 'rl-prod', vazio: 'Nenhum produto informado nos chamados filtrados.' })}</section>
+        <section class="card rl-graf"><h2>Chamados por destino</h2>${barras(porDestino, { acao: 'rl-destino', vazio: 'Sem chamados.' })}</section>
         <section class="card rl-graf"><h2>Motivos dos produtos</h2>${barras(motivos, { acao: 'rl-motivo', vazio: 'Nenhum produto informado nos chamados filtrados.' })}</section>
         <section class="card rl-graf"><h2>Decisão sobre os produtos</h2>${decisaoBarra}</section>
       </div>
@@ -1017,11 +1033,11 @@
     const { itens, chamados } = filtrarRelatorio();
     const cel = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
     const num = (q) => q == null ? '' : String(Number(q)).replace('.', ',');
-    const cols = ['Data', 'Protocolo', 'Tipo', 'Status', 'Loja', 'Código', 'Produto', 'Quantidade', 'Unidade', 'Motivo do produto', 'Decisão', 'Qtd. aceita', 'Justificativa'];
-    const linhas = itens.map((i) => [new Date(i.chamado.criado_em).toLocaleDateString('pt-BR'), i.chamado.protocolo, TIPOS[i.chamado.tipo]?.rot, STATUS[i.chamado.status], i.chamado.loja_nome,
+    const cols = ['Data', 'Protocolo', 'Destino', 'Tipo', 'Status', 'Loja', 'Código', 'Produto', 'Quantidade', 'Unidade', 'Motivo do produto', 'Decisão', 'Qtd. aceita', 'Justificativa'];
+    const linhas = itens.map((i) => [new Date(i.chamado.criado_em).toLocaleDateString('pt-BR'), i.chamado.protocolo, DESTINOS[i.chamado.destino] || '', TIPOS[i.chamado.tipo]?.rot, STATUS[i.chamado.status], i.chamado.loja_nome,
       i.sku, i.produto, num(i.quantidade), i.quantidade != null ? (i.unidade || 'un') : '', i.motivo, DECISOES[i.decisao], num(i.qtd_aceita), i.justificativa]);
     // Chamados sem produto também entram, para a planilha bater com o total de chamados.
-    chamados.filter((t) => !(t.itens || []).length).forEach((t) => linhas.push([new Date(t.criado_em).toLocaleDateString('pt-BR'), t.protocolo, TIPOS[t.tipo]?.rot, STATUS[t.status], t.loja_nome, '', '', '', '', t.motivo, '', '', '']));
+    chamados.filter((t) => !(t.itens || []).length).forEach((t) => linhas.push([new Date(t.criado_em).toLocaleDateString('pt-BR'), t.protocolo, DESTINOS[t.destino] || '', TIPOS[t.tipo]?.rot, STATUS[t.status], t.loja_nome, '', '', '', '', t.motivo, '', '', '']));
     const blob = new Blob(['﻿' + cols.map(cel).join(';') + '\n' + linhas.map((l) => l.map(cel).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
