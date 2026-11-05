@@ -52,6 +52,11 @@
         <p class="lead">Registre aqui reclamações, devoluções, avarias e dúvidas. Você recebe um número de protocolo e acompanha a resposta na aba <b>Acompanhar chamado</b>.</p>
 
         <fieldset>
+          <legend id="dest-leg">Para quem é o chamado? *</legend>
+          <div class="destinos" id="destinos" role="radiogroup" aria-labelledby="dest-leg"></div>
+        </fieldset>
+
+        <fieldset>
           <legend>Dados da loja</legend>
           <div class="loja-fixa" id="loja-fixa" hidden></div>
           <div class="fields">
@@ -181,6 +186,11 @@
     <p class="bv-loja" id="bv-loja" hidden></p>
     <p class="bv-txt">Este é o SAC das lojas UniSuper. Por aqui você abre reclamações, devoluções e avarias, manda fotos e vídeos e acompanha a resposta da equipe.</p>
     <button class="btn primary bv-btn" type="button" id="bv-ok">Abrir chamado</button>
+    <div class="bv-destinos" id="bv-destinos" hidden>
+      <h2>Para quem é o chamado?</h2>
+      <div class="bv-opcoes" id="bv-opcoes"></div>
+      <button class="btn small" type="button" id="bv-voltar">Voltar</button>
+    </div>
     <span class="bv-grupo">Atendimento <img src="img/victos-logo.png" alt="Victos Alimentos e Logística" width="720" height="212"></span>
   </div>
 </div>
@@ -192,7 +202,7 @@
 <script src="comum.js"></script>
 <script>
 (function () {
-  const { TIPOS, STATUS, MOTIVOS_ITEM, tipoPelosItens, fmtQtd, lerQtd, MAX_ARQUIVO, tipoArquivo, tamanho, decisaoTexto, $, esc, soDigitos, store, prazoDe, prazoInfo, quando, toast, copiar, mensagemErro } = window.SAC;
+  const { TIPOS, STATUS, DESTINOS, MOTIVOS_ITEM, tipoPelosItens, fmtQtd, lerQtd, MAX_ARQUIVO, tipoArquivo, tamanho, decisaoTexto, $, esc, soDigitos, store, prazoDe, prazoInfo, quando, toast, copiar, mensagemErro } = window.SAC;
   const cfg = window.SAC_CONFIG || {};
   const sb = window.SAC.cliente();
   let atual = null; // chamado aberto na consulta: {protocolo, whatsapp}
@@ -215,6 +225,12 @@
   // ---------- formulário ----------
   $('sla-list').innerHTML = '<h3>Prazo de primeira resposta</h3>' + Object.values(TIPOS).map((t) =>
     `<div><span>${esc(t.rot)}</span><b class="mono">${t.sla} h</b></div>`).join('');
+  // Destino do chamado: cartões no topo do formulário (o app também pergunta logo nas boas-vindas).
+  $('destinos').innerHTML = Object.entries(DESTINOS).map(([k, r]) =>
+    `<label class="destino"><input type="radio" name="destino" value="${k}"><span>${esc(r)}</span></label>`).join('');
+  const destinoAtual = () => (document.querySelector('input[name="destino"]:checked') || {}).value || '';
+  function escolherDestino(k) { const r = document.querySelector(`input[name="destino"][value="${k}"]`); if (r) r.checked = true; }
+
   function novaLinha() {
     const d = document.createElement('div');
     d.className = 'item-linha';
@@ -447,6 +463,7 @@
     e.preventDefault();
     if (!sb) return;
     const v = (id) => $(id).value.trim();
+    if (!destinoAtual()) { $('form-msg').textContent = 'Escolha para quem é o chamado (UniSuper, Victos Horti, Victos Perecível ou Buongusto).'; $('destinos').querySelector('input').focus(); return; }
     const faltando = [['f-loja', 'nome da loja'], ['f-contato', 'seu nome'], ['f-whats', 'WhatsApp'], ['f-desc', 'descrição']].filter(([id]) => !v(id));
     if (faltando.length) { $('form-msg').textContent = 'Preencha: ' + faltando.map((f) => f[1]).join(', ') + '.'; $(faltando[0][0]).focus(); return; }
     if (soDigitos(v('f-whats')).length < 10) { $('form-msg').textContent = 'Confira o WhatsApp: use DDD + número.'; $('f-whats').focus(); return; }
@@ -487,7 +504,7 @@
       const { data, error } = await sb.rpc('abrir_chamado', { dados: {
         tipo, motivo, loja_nome: loja.nome, loja_cnpj: loja.cnpj, loja_cidade: loja.cidade,
         loja_contato: loja.contato, loja_whatsapp: loja.whatsapp, nf: v('f-nf'), descricao: v('f-desc'), itens, anexos,
-        loja_codigo: lojaFixa ? lojaFixa.codigo : null
+        loja_codigo: lojaFixa ? lojaFixa.codigo : null, destino: destinoAtual()
       } });
       if (error) throw error;
       const protocolo = data.protocolo;
@@ -498,7 +515,7 @@
       ['f-nf', 'f-desc'].forEach((id) => { $(id).value = ''; });
       limparItens(); limparAnexos(); $('form-msg').textContent = '';
       $('suc-code').textContent = protocolo;
-      $('suc-prazo').textContent = 'Primeira resposta em até ' + TIPOS[tipo].sla + ' horas.';
+      $('suc-prazo').textContent = 'Para ' + DESTINOS[destinoAtual()] + '. Primeira resposta em até ' + TIPOS[tipo].sla + ' horas.';
       $('form-area').hidden = true; $('sucesso').hidden = false;
       window.scrollTo(0, 0);
     } catch (err) {
@@ -553,6 +570,7 @@
         <span class="pill s-${esc(t.status)}">${esc(STATUS[t.status] || t.status)}</span>
       </div>
       <dl class="kv">
+        ${t.destino ? `<dt>Para</dt><dd>${esc(DESTINOS[t.destino] || t.destino)}</dd>` : ''}
         <dt>Tipo</dt><dd>${esc(TIPOS[t.tipo]?.rot || t.tipo)} · ${esc(t.motivo)}</dd>
         <dt>Loja</dt><dd>${esc(t.loja_nome)}</dd>
         ${t.nf ? `<dt>Nota / pedido</dt><dd class="mono">${esc(t.nf)}</dd>` : ''}
@@ -613,11 +631,29 @@
     document.body.classList.add('sem-rolagem');
     $('bv-ok').focus();
   }
-  $('bv-ok').addEventListener('click', () => {
+  $('bv-opcoes').innerHTML = Object.entries(DESTINOS).map(([k, r]) => `<button class="bv-opcao" type="button" data-destino="${k}">${esc(r)}</button>`).join('');
+  function fecharBoasVindas() {
     store.set('sac.boasVindasVista', Date.now());
     $('boas-vindas').classList.add('saindo');
     setTimeout(() => { $('boas-vindas').hidden = true; document.body.classList.remove('sem-rolagem'); }, 250);
     if (location.hash === '#boas-vindas') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ok */ } }
+  }
+  // "Abrir chamado" leva à pergunta "Para quem é o chamado?"; a escolha já vem marcada no formulário.
+  $('bv-ok').addEventListener('click', () => {
+    $('boas-vindas').classList.add('escolhendo');
+    $('bv-ok').hidden = true; $('bv-destinos').hidden = false;
+    $('bv-opcoes').querySelector('button').focus();
+  });
+  $('bv-voltar').addEventListener('click', () => {
+    $('boas-vindas').classList.remove('escolhendo');
+    $('bv-destinos').hidden = true; $('bv-ok').hidden = false; $('bv-ok').focus();
+  });
+  $('bv-opcoes').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-destino]');
+    if (!b) return;
+    escolherDestino(b.dataset.destino);
+    irPara('novo');
+    fecharBoasVindas();
   });
   const ua = navigator.userAgent || '';
   const ehIphone = /iphone|ipad|ipod/i.test(ua);

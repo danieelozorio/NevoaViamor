@@ -95,6 +95,13 @@ create table if not exists public.lojas (
 );
 
 alter table public.chamados add column if not exists loja_id uuid references public.lojas (id) on delete set null;
+
+-- Para quem é o chamado: UniSuper, Victos Horti, Victos Perecível ou Buongusto.
+alter table public.chamados add column if not exists destino text;
+alter table public.chamados drop constraint if exists chamados_destino_check;
+alter table public.chamados add constraint chamados_destino_check
+  check (destino is null or destino in ('unisuper', 'victos_horti', 'victos_perecivel', 'buongusto'));
+create index if not exists chamados_destino_idx on public.chamados (destino);
 create index if not exists chamados_loja_idx on public.chamados (loja_id);
 
 -- Catálogo de produtos: a loja digita o código e o nome aparece (e vice-versa).
@@ -244,6 +251,9 @@ begin
   if v_tipo not in ('reclamacao', 'devolucao', 'avaria', 'duvida') then
     raise exception 'Tipo de atendimento inválido' using errcode = '22023';
   end if;
+  if coalesce(dados->>'destino', '') not in ('unisuper', 'victos_horti', 'victos_perecivel', 'buongusto') then
+    raise exception 'Escolha para quem é o chamado' using errcode = '22023';
+  end if;
   if coalesce(trim(dados->>'loja_nome'), '') = '' or coalesce(trim(dados->>'loja_contato'), '') = ''
      or coalesce(trim(dados->>'motivo'), '') = '' or coalesce(trim(dados->>'descricao'), '') = '' then
     raise exception 'Preencha os campos obrigatórios' using errcode = '22023';
@@ -276,12 +286,12 @@ begin
          from (select uuid_send(gen_random_uuid()) as b) r, generate_series(0, 3) i);
     begin
       insert into public.chamados (protocolo, tipo, motivo, prioridade, loja_id, loja_nome, loja_cnpj, loja_cidade,
-                                   loja_contato, loja_whatsapp, nf, descricao, anexos)
+                                   loja_contato, loja_whatsapp, nf, descricao, anexos, destino)
       values (v_proto, v_tipo, left(trim(dados->>'motivo'), 120),
               case when v_tipo = 'avaria' then 'alta' else 'normal' end, v_loja.id,
               left(trim(dados->>'loja_nome'), 200), left(nullif(trim(dados->>'loja_cnpj'), ''), 30),
               left(nullif(trim(dados->>'loja_cidade'), ''), 120), left(trim(dados->>'loja_contato'), 120),
-              v_whats, left(nullif(trim(dados->>'nf'), ''), 60), trim(dados->>'descricao'), v_anexos)
+              v_whats, left(nullif(trim(dados->>'nf'), ''), 60), trim(dados->>'descricao'), v_anexos, dados->>'destino')
       returning id into v_id;
       exit;
     exception when unique_violation then
@@ -346,7 +356,7 @@ returns jsonb
 language sql stable security definer set search_path = public
 as $$
   select jsonb_build_object(
-    'protocolo', c.protocolo, 'tipo', c.tipo, 'motivo', c.motivo, 'status', c.status,
+    'protocolo', c.protocolo, 'tipo', c.tipo, 'motivo', c.motivo, 'status', c.status, 'destino', c.destino,
     'loja_nome', c.loja_nome, 'nf', c.nf, 'descricao', c.descricao, 'anexos_qtd', cardinality(c.anexos),
     'criado_em', c.criado_em, 'atualizado_em', c.atualizado_em,
     'itens', coalesce((
