@@ -1,6 +1,6 @@
-# Central SAC Victos
+# SAC UniSuper
 
-Site de atendimento às lojas da Victos: reclamações, devoluções, avarias e dúvidas.
+Site e app de atendimento às lojas UniSuper, operado pela Victos Alimentos e Logística: reclamações, devoluções, avarias e dúvidas.
 
 ## Como colocar no ar
 
@@ -55,7 +55,7 @@ A aba **Produtos** guarda o catálogo (código + nome). Cadastre um por um ou co
 
 ## App no celular (Android)
 
-A página das lojas é um **app instalável**. No Android, ao abrir o site pelo Chrome, aparece a faixa **"Instale o app SAC Victos"**. Também dá pelo menu do Chrome (⋮), em **Instalar app** ou **Adicionar à tela inicial**. O ícone da Victos fica na tela do celular, e o app abre em tela cheia.
+A página das lojas é um **app instalável**. No Android, ao abrir o site pelo Chrome, aparece a faixa **"Instale o app SAC UniSuper"**. Também dá pelo menu do Chrome (⋮), em **Instalar app** ou **Adicionar à tela inicial**. O ícone da UniSuper (o "U" vermelho) fica na tela do celular, e o app abre em tela cheia.
 
 - Quem instala a partir do link da loja continua com a loja identificada.
 - O app abre mesmo com internet fraca. Para enviar o chamado, precisa de conexão.
@@ -82,4 +82,4 @@ São 500 MB de banco e 1 GB de arquivos, e cada arquivo pode ter no máximo 50 M
 - `comum.js`, `estilo.css`: partes compartilhadas
 - `config.js`: a sua configuração do Supabase
 - `supabase.sql`: estrutura e regras de segurança do banco
-- `img/`: logos da Victos (versões para fundo claro e escuro), ícone do site e selo do Grupo UniSuper
+- `img/`: logos da UniSuper (com e sem slogan, para fundo claro e escuro), ícones do app e o logo da Victos do rodapé

@@ -6,7 +6,7 @@ img { max-width: 100%; }
 [hidden] { display: none !important; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-/* Layout: faixa de cabeçalho com o logo Victos e uma linha no degradê do símbolo; abaixo, uma coluna de trabalho e uma gaveta lateral para o chamado aberto. */
+/* Layout: faixa de cabeçalho com o logo UniSuper e uma linha verde e vermelha; abaixo, uma coluna de trabalho e uma gaveta lateral para o chamado aberto. */
 :root {
   --bg: #f4f6f9;
   --surface: #ffffff;
@@ -14,13 +14,13 @@ img { max-width: 100%; }
   --ink: #1e2a3c;
   --muted: #5a6b85;
   --line: #dde3ec;
-  --accent: #d24a17;          /* laranja do nome VICTOS, escurecido para texto branco legível */
+  --accent: #c4000e;          /* vermelho UniSuper */
   --accent-ink: #ffffff;
-  --accent-soft: #fdebe2;
-  --slate: #5f7aa3;           /* azul de "Alimentos e Logística" */
-  --grad: linear-gradient(90deg, #f6a531 0%, #e8541e 55%, #c8202a 100%);
-  --grad-v: linear-gradient(180deg, #f6a531 0%, #e8541e 100%);
-  --stub-ink: #2b1203;
+  --accent-soft: #fde6e7;
+  --slate: #00782c;           /* verde UniSuper */
+  --grad: linear-gradient(90deg, #00782c 0 18%, #c4000e 18% 100%);
+  --grad-v: linear-gradient(180deg, #e0283a 0%, #c4000e 100%);
+  --stub-ink: #ffffff;
   --selo: #ffffff;
   --ok: #1f7a46; --ok-soft: #e0f2e7;
   --warn: #9a5b00; --warn-soft: #fcefd6;
@@ -35,7 +35,7 @@ img { max-width: 100%; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #121822; --surface: #1a2230; --surface-2: #202a3a; --ink: #e9edf4; --muted: #9fadc4; --line: #2d394b;
-    --accent: #ff7d47; --accent-ink: #2a0e02; --accent-soft: #3b2218; --slate: #a9bde0;
+    --accent: #ff5a62; --accent-ink: #2a0306; --accent-soft: #3d1619; --slate: #4cc77a;
     --ok: #6fd39a; --ok-soft: #173826; --warn: #f2bd5c; --warn-soft: #3a2c10; --bad: #ff8f86; --bad-soft: #43201d;
     --info: #a9bde0; --info-soft: #24304a; --shadow: 0 10px 30px rgba(0, 0, 0, .45);
     color-scheme: dark;
@@ -43,7 +43,7 @@ img { max-width: 100%; }
 }
 :root[data-theme="dark"] {
   --bg: #121822; --surface: #1a2230; --surface-2: #202a3a; --ink: #e9edf4; --muted: #9fadc4; --line: #2d394b;
-  --accent: #ff7d47; --accent-ink: #2a0e02; --accent-soft: #3b2218; --slate: #a9bde0;
+  --accent: #ff5a62; --accent-ink: #2a0306; --accent-soft: #3d1619; --slate: #4cc77a;
   --ok: #6fd39a; --ok-soft: #173826; --warn: #f2bd5c; --warn-soft: #3a2c10; --bad: #ff8f86; --bad-soft: #43201d;
   --info: #a9bde0; --info-soft: #24304a; --shadow: 0 10px 30px rgba(0, 0, 0, .45);
   color-scheme: dark;
@@ -452,7 +452,7 @@ div.f { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-
 .bv-faixa { height: 8px; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); background: var(--grad); flex: none; }
 .bv-corpo { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 18px; padding-block: 32px; max-width: 520px; margin: 0 auto; width: 100%; }
 .bv-corpo picture { display: contents; }
-.bv-logo { width: min(280px, 75%); height: auto; }
+.bv-logo { width: min(300px, 80%); height: auto; }
 .boas-vindas h1 { font-size: clamp(48px, 15vw, 80px); line-height: 1; color: var(--accent); letter-spacing: -.02em; margin-top: 8px; }
 .bv-loja { margin: -6px 0 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(20px, 6vw, 26px); color: var(--ink); overflow-wrap: anywhere; }
 .bv-txt { margin: 0; color: var(--muted); font-size: 17px; max-width: 34ch; }
@@ -466,3 +466,9 @@ body.sem-rolagem { overflow: hidden; }
   .boas-vindas.saindo { opacity: 0; transition: opacity .25s; }
   @keyframes bv-entra { from { opacity: 0; transform: translateY(12px); } }
 }
+
+/* Logo UniSuper: um pouco mais alto que o da Victos, porque é mais quadrado */
+.brand .logo { height: 46px; }
+@media (max-width: 620px) { .brand .logo { height: 38px; } }
+.rodape .grupo img { height: 26px; }
+.rodape .credito { flex-basis: 100%; text-align: center; font-size: 12px; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--line); }
