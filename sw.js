@@ -1,7 +1,7 @@
 // Service worker do app SAC UniSuper.
 // Páginas e arquivos do site: busca na rede primeiro (para sempre pegar a versão nova)
 // e usa a cópia guardada quando a internet falha. Chamadas ao Supabase nunca passam por aqui.
-const CACHE = 'sac-unisuper-v2';
+const CACHE = 'sac-unisuper-v3';
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
 const BASICOS = [
   './', 'index.html', 'estilo.css', 'comum.js', 'config.js', 'manifest.webmanifest',
@@ -43,7 +43,12 @@ self.addEventListener('fetch', (e) => {
 
   e.respondWith((async () => {
     try {
-      const r = await fetch(req);
+      // 'no-cache' confere com o servidor a cada abertura: depois de uma atualização, a versão nova chega na hora.
+      // (Uma navegação não pode ser copiada com opções, então refaz o pedido pelo endereço.)
+      const pedido = req.mode === 'navigate'
+        ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+        : new Request(req, { cache: 'no-cache' });
+      const r = await fetch(pedido);
       if (r.ok && r.type === 'basic') { const copia = r.clone(); caches.open(CACHE).then((cache) => cache.put(req, copia)); }
       return r;
     } catch (err) {
