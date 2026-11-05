@@ -38,6 +38,11 @@
   <div id="banners"></div>
 
   <!-- Login -->
+  <!-- Enquanto conecta ao banco -->
+  <section id="v-conectando">
+    <div class="empty" style="margin-top:24px"><b>Conectando ao banco de dados…</b><span>Isso leva só alguns segundos.</span></div>
+  </section>
+
   <section id="v-login" hidden>
     <form class="card" id="login" novalidate style="max-width:420px;margin:24px auto;display:grid;gap:14px">
       <h2>Entrar no painel</h2>
@@ -263,6 +268,7 @@
     if (!sb) { $('banners').innerHTML = window.SAC.configPendente(); return; }
 
   function mostrar(sec) {
+    $('v-conectando').hidden = true;
     ['login', 'negado', 'fila', 'relatorios', 'link', 'produtos'].forEach((v) => { $('v-' + v).hidden = v !== sec; });
     $('tabs').hidden = !['fila', 'relatorios', 'link', 'produtos'].includes(sec);
     if (sec === 'relatorios') abrirRelatorios();
@@ -277,13 +283,27 @@
     const email = $('l-email').value.trim(), password = $('l-senha').value;
     if (!email || !password) { $('l-msg').textContent = 'Informe e-mail e senha.'; return; }
     $('l-btn').disabled = true; $('l-msg').textContent = 'Entrando…';
-    const { error } = await sb.auth.signInWithPassword({ email, password });
+    let error;
+    try { ({ error } = await comLimite(sb.auth.signInWithPassword({ email, password }))); }
+    catch (e) { $('l-btn').disabled = false; $('l-msg').textContent = ''; bancoSemResposta(); return; }
     $('l-btn').disabled = false;
     $('l-msg').textContent = error ? mensagemErro(error) : '';
   });
   async function sair() { if (S.canal) { sb.removeChannel(S.canal); S.canal = null; } await sb.auth.signOut(); }
   $('sair').addEventListener('click', sair);
   $('negado-sair').addEventListener('click', sair);
+
+  // Se o banco não responder (o Supabase gratuito pausa o projeto depois de 7 dias sem uso),
+  // a página explica o que fazer em vez de ficar em branco.
+  const LIMITE_MS = 15000;
+  const comLimite = (promessa) => Promise.race([promessa, new Promise((_, rej) => setTimeout(() => rej(new Error('sem-resposta')), LIMITE_MS))]);
+  function bancoSemResposta() {
+    $('v-conectando').hidden = true;
+    $('banners').innerHTML = `<div class="banner"><div><b>O banco de dados não respondeu.</b>
+      O plano gratuito do Supabase pausa o projeto depois de 7 dias sem uso. Para reativar: entre em <b>supabase.com</b>, abra o projeto da Victos e clique em <b>Restore project</b>. Espere uns minutos e tente de novo.
+      <div class="actions" style="margin-top:10px"><button class="btn small" type="button" onclick="location.reload()">Tentar de novo</button></div></div></div>`;
+  }
+  const vigia = setTimeout(() => { if (!$('v-conectando').hidden) bancoSemResposta(); }, LIMITE_MS);
 
   let iniciado; // undefined até a primeira resposta, para a tela de login aparecer
   sb.auth.onAuthStateChange((_ev, session) => {
@@ -297,8 +317,16 @@
   async function entrou(session) {
     if (!session) { S.uid = null; S.tickets = []; fechar(); mostrar('login'); return; }
     S.uid = session.user.id; S.email = session.user.email || '';
-    const { data: ok, error } = await sb.rpc('eh_equipe');
-    if (error) { $('banners').innerHTML = `<div class="banner"><div><b>Não foi possível verificar seu acesso.</b> ${esc(mensagemErro(error))}</div></div>`; return; }
+    let ok, error;
+    try { ({ data: ok, error } = await comLimite(sb.rpc('eh_equipe'))); }
+    catch (e) { bancoSemResposta(); return; }
+    clearTimeout(vigia);
+    if (error) {
+      if (/fetch|network|503|504|540/i.test(String(error.message || error.code || ''))) { bancoSemResposta(); return; }
+      $('v-conectando').hidden = true;
+      $('banners').innerHTML = `<div class="banner"><div><b>Não foi possível verificar seu acesso.</b> ${esc(mensagemErro(error))}</div></div>`;
+      return;
+    }
     if (!ok) { $('negado-email').textContent = S.email; mostrar('negado'); return; }
     $('banners').innerHTML = '';
     mostrar(S.view);
