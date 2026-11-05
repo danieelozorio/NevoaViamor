@@ -5,7 +5,7 @@ const CACHE = 'sac-unisuper-v2';
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
 const BASICOS = [
   './', 'index.html', 'estilo.css', 'comum.js', 'config.js', 'manifest.webmanifest',
-  'img/unisuper-logo-grande.png', 'img/unisuper-logo-escuro.png', 'img/victos-logo.png',
+  'img/unisuper-logo-grande.png', 'img/unisuper-logo-escuro.png', 'img/unisuper-logo-slogan.png', 'img/unisuper-logo-slogan-escuro.png', 'img/victos-logo.png',
   'img/us-favicon.png', 'img/us-app-192.png', 'img/us-app-512.png', 'img/us-apple-touch-icon.png'
 ];
 

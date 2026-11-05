@@ -452,7 +452,7 @@ div.f { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-
 .bv-faixa { height: 8px; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); background: var(--grad); flex: none; }
 .bv-corpo { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 18px; padding-block: 32px; max-width: 520px; margin: 0 auto; width: 100%; }
 .bv-corpo picture { display: contents; }
-.bv-logo { width: min(280px, 75%); height: auto; }
+.bv-logo { width: min(300px, 80%); height: auto; }
 .boas-vindas h1 { font-size: clamp(48px, 15vw, 80px); line-height: 1; color: var(--accent); letter-spacing: -.02em; margin-top: 8px; }
 .bv-loja { margin: -6px 0 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(20px, 6vw, 26px); color: var(--ink); overflow-wrap: anywhere; }
 .bv-txt { margin: 0; color: var(--muted); font-size: 17px; max-width: 34ch; }
