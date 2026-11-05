@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Painel SAC Victos</title>
+<title>Painel SAC UniSuper</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="estilo.css">
-<link rel="icon" type="image/png" href="img/favicon.png">
-<link rel="apple-touch-icon" href="img/victos-icone.png">
-<meta name="theme-color" content="#e8541e">
+<link rel="icon" type="image/png" href="img/us-favicon.png">
+<link rel="apple-touch-icon" href="img/us-apple-touch-icon.png">
+<meta name="theme-color" content="#c4000e">
 </head>
 <body>
 
@@ -19,8 +19,8 @@
   <div class="wrap">
     <a class="brand" href="painel.html">
       <picture>
-        <source srcset="img/victos-logo-escuro.png" media="(prefers-color-scheme: dark)">
-        <img class="logo" src="img/victos-logo.png" alt="Victos Alimentos e Logística" width="720" height="212">
+        <source srcset="img/unisuper-logo-escuro.png" media="(prefers-color-scheme: dark)">
+        <img class="logo" src="img/unisuper-logo-grande.png" alt="UniSuper" width="453" height="237">
       </picture>
       <span class="brand-sub">Painel SAC</span>
     </a>
@@ -228,8 +228,8 @@
 
 <footer class="rodape">
   <div class="wrap">
-    <span>Victos Alimentos e Logística · Central de atendimento às lojas</span>
-    <span class="grupo">Uma empresa do <span class="selo"><img src="img/unisuper-logo.png" alt="Grupo UniSuper" width="153" height="80"></span></span>
+    <span>SAC das lojas UniSuper · Sempre perto, sempre próximo.</span>
+    <span class="grupo">Atendimento <span class="selo"><img src="img/victos-logo.png" alt="Victos Alimentos e Logística" width="720" height="212"></span></span>
   </div>
 </footer>
 
@@ -238,7 +238,7 @@
   <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-tit">
     <div class="qr-cab"><h2 id="qr-tit"></h2><button class="btn small" type="button" id="qr-fechar">Fechar</button></div>
     <div class="qr-folha" id="qr-folha">
-      <img class="qr-logo" src="img/victos-logo.png" alt="Victos">
+      <img class="qr-logo" src="img/unisuper-logo-grande.png" alt="UniSuper">
       <div id="qr-codigo" class="qr-codigo"></div>
       <b id="qr-nome"></b>
       <span>Aponte a câmera do celular para abrir um chamado no SAC</span>
@@ -300,7 +300,7 @@
   function bancoSemResposta() {
     $('v-conectando').hidden = true;
     $('banners').innerHTML = `<div class="banner"><div><b>O banco de dados não respondeu.</b>
-      O plano gratuito do Supabase pausa o projeto depois de 7 dias sem uso. Para reativar: entre em <b>supabase.com</b>, abra o projeto da Victos e clique em <b>Restore project</b>. Espere uns minutos e tente de novo.
+      O plano gratuito do Supabase pausa o projeto depois de 7 dias sem uso. Para reativar: entre em <b>supabase.com</b>, abra o projeto do SAC e clique em <b>Restore project</b>. Espere uns minutos e tente de novo.
       <div class="actions" style="margin-top:10px"><button class="btn small" type="button" onclick="location.reload()">Tentar de novo</button></div></div></div>`;
   }
   const vigia = setTimeout(() => { if (!$('v-conectando').hidden) bancoSemResposta(); }, LIMITE_MS);
@@ -1152,10 +1152,10 @@
     const g = c.getContext('2d');
     g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
     const grad = g.createLinearGradient(0, 0, W, 0);
-    grad.addColorStop(0, '#f6a531'); grad.addColorStop(0.55, '#e8541e'); grad.addColorStop(1, '#c8202a');
+    grad.addColorStop(0, '#00782c'); grad.addColorStop(0.18, '#00782c'); grad.addColorStop(0.18, '#c4000e'); grad.addColorStop(1, '#c4000e');
     g.fillStyle = grad; g.fillRect(0, 0, W, 14);
     const logo = $('qr-folha').querySelector('.qr-logo');
-    if (logo.complete && logo.naturalWidth) { const lw = 360, lh = lw * logo.naturalHeight / logo.naturalWidth; g.drawImage(logo, (W - lw) / 2, 60, lw, lh); }
+    if (logo.complete && logo.naturalWidth) { const lh = 130, lw = lh * logo.naturalWidth / logo.naturalHeight; g.drawImage(logo, (W - lw) / 2, 50, lw, lh); }
     g.imageSmoothingEnabled = false;
     g.drawImage(qr, (W - 520) / 2, 230, 520, 520);
     g.fillStyle = '#1e2a3c'; g.textAlign = 'center';
@@ -1171,7 +1171,7 @@
 
   $('link-loja').textContent = linkLoja;
   $('link-copiar').addEventListener('click', () => copiar(linkLoja));
-  $('link-qr').addEventListener('click', () => abrirQr('SAC Victos', linkLoja));
+  $('link-qr').addEventListener('click', () => abrirQr('SAC UniSuper', linkLoja));
 })();
 </script>
 </body>

@@ -1,12 +1,12 @@
-// Service worker do app SAC Victos.
+// Service worker do app SAC UniSuper.
 // Páginas e arquivos do site: busca na rede primeiro (para sempre pegar a versão nova)
 // e usa a cópia guardada quando a internet falha. Chamadas ao Supabase nunca passam por aqui.
-const CACHE = 'sac-victos-v1';
+const CACHE = 'sac-unisuper-v2';
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
 const BASICOS = [
   './', 'index.html', 'estilo.css', 'comum.js', 'config.js', 'manifest.webmanifest',
-  'img/victos-logo.png', 'img/victos-logo-escuro.png', 'img/unisuper-logo.png',
-  'img/favicon.png', 'img/app-192.png', 'img/app-512.png', 'img/apple-touch-icon.png'
+  'img/unisuper-logo-grande.png', 'img/unisuper-logo-escuro.png', 'img/victos-logo.png',
+  'img/us-favicon.png', 'img/us-app-192.png', 'img/us-app-512.png', 'img/us-apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {

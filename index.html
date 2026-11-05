@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SAC Victos</title>
-<meta name="description" content="Abra e acompanhe reclamações, devoluções, avarias e dúvidas.">
+<title>SAC UniSuper</title>
+<meta name="description" content="SAC das lojas UniSuper: abra e acompanhe reclamações, devoluções, avarias e dúvidas.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="estilo.css">
-<link rel="icon" type="image/png" href="img/favicon.png">
-<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="img/us-favicon.png">
+<link rel="apple-touch-icon" href="img/us-apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#e8541e">
+<meta name="theme-color" content="#c4000e">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="SAC Victos">
+<meta name="apple-mobile-web-app-title" content="SAC UniSuper">
 </head>
 <body>
 
@@ -22,8 +22,8 @@
   <div class="wrap">
     <a class="brand" href="./">
       <picture>
-        <source srcset="img/victos-logo-escuro.png" media="(prefers-color-scheme: dark)">
-        <img class="logo" src="img/victos-logo.png" alt="Victos Alimentos e Logística" width="720" height="212">
+        <source srcset="img/unisuper-logo-escuro.png" media="(prefers-color-scheme: dark)">
+        <img class="logo" src="img/unisuper-logo-grande.png" alt="UniSuper" width="453" height="237">
       </picture>
       <span class="brand-sub">Central SAC</span>
     </a>
@@ -37,8 +37,8 @@
 <main class="wrap">
   <div id="banners"></div>
   <div class="instalar" id="instalar" hidden>
-    <img src="img/app-192.png" alt="" width="44" height="44">
-    <div><b>Instale o app SAC Victos</b><span>Fica na tela do celular e abre direto no formulário.</span></div>
+    <img src="img/us-app-192.png" alt="" width="44" height="44">
+    <div><b>Instale o app SAC UniSuper</b><span>Fica na tela do celular e abre direto no formulário.</span></div>
     <button class="btn primary small" type="button" id="instalar-sim">Instalar</button>
     <button class="btn small" type="button" id="instalar-nao" aria-label="Agora não">Agora não</button>
     <p class="instalar-ajuda" id="instalar-ajuda" hidden></p>
@@ -164,8 +164,8 @@
 
 <footer class="rodape">
   <div class="wrap">
-    <span>Victos Alimentos e Logística · Central de atendimento às lojas</span>
-    <span class="grupo">Uma empresa do <span class="selo"><img src="img/unisuper-logo.png" alt="Grupo UniSuper" width="153" height="80"></span></span>
+    <span>SAC das lojas UniSuper · Sempre perto, sempre próximo.</span>
+    <span class="grupo">Atendimento <span class="selo"><img src="img/victos-logo.png" alt="Victos Alimentos e Logística" width="720" height="212"></span></span>
   </div>
 </footer>
 
@@ -173,14 +173,14 @@
   <div class="bv-faixa" aria-hidden="true"></div>
   <div class="bv-corpo">
     <picture>
-      <source srcset="img/victos-logo-escuro.png" media="(prefers-color-scheme: dark)">
-      <img src="img/victos-logo.png" alt="Victos Alimentos e Logística" class="bv-logo" width="720" height="212">
+      <source srcset="img/unisuper-logo-escuro.png" media="(prefers-color-scheme: dark)">
+      <img src="img/unisuper-logo-grande.png" alt="UniSuper" class="bv-logo" width="453" height="237">
     </picture>
     <h1 id="bv-tit">Bem-vindo!</h1>
     <p class="bv-loja" id="bv-loja" hidden></p>
-    <p class="bv-txt">Este é o app do SAC da Victos. Por aqui você abre reclamações, devoluções e avarias, manda fotos e vídeos e acompanha a resposta da nossa equipe.</p>
+    <p class="bv-txt">Este é o SAC das lojas UniSuper. Por aqui você abre reclamações, devoluções e avarias, manda fotos e vídeos e acompanha a resposta da equipe.</p>
     <button class="btn primary bv-btn" type="button" id="bv-ok">Abrir chamado</button>
-    <span class="bv-grupo">Uma empresa do <img src="img/unisuper-logo.png" alt="Grupo UniSuper" width="153" height="80"></span>
+    <span class="bv-grupo">Atendimento <img src="img/victos-logo.png" alt="Victos Alimentos e Logística" width="720" height="212"></span>
   </div>
 </div>
 
@@ -196,7 +196,6 @@
   const sb = window.SAC.cliente();
   let atual = null; // chamado aberto na consulta: {protocolo, whatsapp}
 
-  if (cfg.empresa) document.title = 'SAC · ' + cfg.empresa;
   if (cfg.whatsappSac) { $('sac-fone').hidden = false; $('sac-fone').textContent = 'Urgente? Fale com o SAC pelo WhatsApp ' + cfg.whatsappSac + '.'; }
   if (!sb) { $('banners').innerHTML = window.SAC.configPendente(); $('btn-enviar').disabled = true; $('btn-consultar').disabled = true; }
 
@@ -646,7 +645,7 @@
     pedidoInstalar = null; // cada aviso do navegador só pode ser usado uma vez
     pedido.prompt();
     const { outcome } = await pedido.userChoice;
-    if (outcome === 'accepted') { $('instalar').hidden = true; toast('App instalado! Procure o ícone SAC Victos na tela do celular.'); }
+    if (outcome === 'accepted') { $('instalar').hidden = true; toast('App instalado! Procure o ícone SAC UniSuper na tela do celular.'); }
     else { $('instalar-sim').textContent = 'Como instalar'; }
   });
   $('instalar-nao').addEventListener('click', () => { $('instalar').hidden = true; });
