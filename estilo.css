@@ -471,3 +471,4 @@ body.sem-rolagem { overflow: hidden; }
 .brand .logo { height: 46px; }
 @media (max-width: 620px) { .brand .logo { height: 38px; } }
 .rodape .grupo img { height: 26px; }
+.rodape .credito { flex-basis: 100%; text-align: center; font-size: 12px; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--line); }
